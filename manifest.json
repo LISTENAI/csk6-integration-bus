@@ -1,0 +1,10 @@
+[
+    {
+        "name": "@lisa-plugin/zephyr",
+        "version": "1.4.2"
+    },
+    {
+        "name": "@lisa-plugin/term",
+        "version": "1.1.0"
+    }
+]

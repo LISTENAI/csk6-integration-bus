@@ -1,0 +1,19 @@
+{
+  "name": "csk6-integration-bus",
+  "version": "1.0.0",
+  "description": "csk6 命令行工具跨平台集成安装",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LISTENAI/csk6-integration-bus.git"
+  },
+  "author": "geekBoom.Zhao <zbzhao@listenai.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LISTENAI/csk6-integration-bus/issues"
+  },
+  "homepage": "https://github.com/LISTENAI/csk6-integration-bus#readme"
+}

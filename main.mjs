@@ -1,0 +1,13 @@
+#!/usr/bin/env zx
+
+let manifest = await fs.readFile('./manifest.json');
+manifest = JSON.parse(manifest.toString());
+
+for (let i in manifest) {
+  const plugin = manifest[i];
+  await lpmInstall(plugin.name, plugin.version);
+}
+
+async function lpmInstall(name, version) {
+  await $`lisa install ${name}@${version} -g`
+}
