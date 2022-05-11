@@ -1,0 +1,5 @@
+
+**.lock
+/outputfile.exe
+/tmp
+node_modules
