@@ -37,10 +37,10 @@ Source: "###zephyrPwd###"; DestDir: "{app}\lisa-zephyr"; Flags: ignoreversion re
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Tasks]
-Name: modifypath; Description: &���ӻ�������; Flags: checkablealone
+Name: modifypath; Description: &添加环境变量; Flags: checkablealone
 [Run]
-;Filename: "{app}\installerScripts\install.bat"; Description: "������װ���ʼ��"; StatusMsg: "����ִ�а�װ��[install]���̣����Ժ�..."; Flags: skipifdoesntexist runhidden
-;Filename: "{app}\installerScripts\info.bat"; Description: "������װ���ʼ��"; StatusMsg: "����ִ�а�װ��[info]���̣����Ժ�..."; Flags: skipifdoesntexist runhidden
+;Filename: "{app}\installerScripts\install.bat"; Description: "启动安装后初始化"; StatusMsg: "正在执行安装后[install]进程，请稍候..."; Flags: skipifdoesntexist runhidden
+;Filename: "{app}\installerScripts\info.bat"; Description: "启动安装后初始化"; StatusMsg: "正在执行安装后[info]进程，请稍候..."; Flags: skipifdoesntexist runhidden
 Filename: "cmd.exe"; Parameters: "/c lisa zep install"; Flags: nowait postinstall skipifsilent runascurrentuser; 
 
 [Code]
@@ -54,7 +54,7 @@ function ModPathDir(): TArrayOfString;
 var
   Dir:	TArrayOfString;
 begin
-  setArrayLength(Dir, 1)  //�˴���1��������1��·��
+  setArrayLength(Dir, 1)  //此处的1代表添加1个路径
   Dir[0] := ExpandConstant('{app}\lisa\bin');
   Result := Dir;
 end;
@@ -68,27 +68,27 @@ begin
   oldpath := oldpath + ';';
   i := 0;
   while (Pos(';', oldpath) > 0) do begin
-    //��ȡPath·���е�һ��·�������ж���Ҫ���ӵ�·���Ƿ����
+    //获取Path路径中的一个路径，并判断与要添加的路径是否相等
     SetArrayLength(pathArr, i+1);
     pathArr[i] := Copy(oldpath, 0, Pos(';', oldpath)-1);
     oldpath := Copy(oldpath, Pos(';', oldpath)+1, Length(oldpath));
     i := i + 1;
-    if addPath = pathArr[i-1] then begin //��·���Ѵ���
-      if IsUninstaller() = true then begin  //��Ϊж�أ���ɾ��Ŀ¼
+    if addPath = pathArr[i-1] then begin //若路径已存在
+      if IsUninstaller() = true then begin  //若为卸载，则删除目录
         continue;
-      end else begin  //��Ϊ��װ����ֹͣ�ظ�����·��
+      end else begin  //若为安装，则停止重复添加路径
         abort;
       end;
     end;
-    //������Ӧ������·������newpath
+    //将所有应保留的路径存入newpath
     if i = 1 then begin
       newpath := pathArr[i-1];
     end else begin
       newpath := newpath + ';' + pathArr[i-1];
     end;
   end; 
-  // ���Path��·��newpath
-  if IsUninstaller() = false then  //��Ϊ��װ��������·��
+  // 获得Path新路径newpath
+  if IsUninstaller() = false then  //若为安装，则加入此路径
     newpath := addPath + ';' + newpath;
     Result := newpath
 end;
@@ -103,22 +103,22 @@ var
   pathArr:	TArrayOfString;
   pathdir:	TArrayOfString;
 begin  	
-	pathdir := ModPathDir();  //��ȡ������װ·����pathdir
-	for d := 0 to GetArrayLength(pathdir)-1 do begin //��һ����·��
-   //��ΪwinNT�ںˡ�winXP,win7,win8,win10����winNT�ں�        
+	pathdir := ModPathDir();  //获取软件安装路径到pathdir
+	for d := 0 to GetArrayLength(pathdir)-1 do begin //逐一添加路径
+   //若为winNT内核。winXP,win7,win8,win10都有winNT内核        
 		if UsingWinNT() = true then begin
-      //���ӻ�ɾ���û���������Path�е�·��
-			RegQueryStringValue(HKEY_CURRENT_USER, 'Environment', 'Path', oldpath);//��ȡ��ǰ·�� 
-			newpath := getNewPath(oldpath,pathdir[d]);                             //��ȡ����·�������·�� 			
-			RegWriteStringValue(HKEY_CURRENT_USER, 'Environment', 'Path', newpath);// ����·������д�뻷��������
-      //���ӻ�ɾ���û���������Path�е�·��
-     	//��ȡ��ǰ·��
+      //添加或删除用户环境变量Path中的路径
+			RegQueryStringValue(HKEY_CURRENT_USER, 'Environment', 'Path', oldpath);//获取当前路径 
+			newpath := getNewPath(oldpath,pathdir[d]);                             //获取添加路径后的新路径 			
+			RegWriteStringValue(HKEY_CURRENT_USER, 'Environment', 'Path', newpath);// 将新路径添加写入环境变量中
+      //添加或删除用户环境变量Path中的路径
+     	//获取当前路径
 			RegQueryStringValue(HKEY_LOCAL_MACHINE, 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'Path', oldpath);
-      newpath := getNewPath(oldpath,pathdir[d]);                             //��ȡ����·�������·��
-			// ����·������д�뻷��������
+      newpath := getNewPath(oldpath,pathdir[d]);                             //获取添加路径后的新路径
+			// 将新路径添加写入环境变量中
 			RegWriteStringValue(HKEY_LOCAL_MACHINE, 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'Path', newpath);   
 
-		//��Ϊwin9X�ںˣ�����ֻ������ϵͳ��������Path
+		//若为win9X内核，可能只添加入系统环境变量Path
 		end else begin
 
 			// Convert to shortened dirname

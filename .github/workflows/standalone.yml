@@ -108,14 +108,14 @@ jobs:
         # Compress-Archive -Path node\* -DestinationPath lisa-standalone-${{ matrix.dist_suffix }}${{ matrix.format }}
         $env:Path = "$pwd\node;$env:Path"
         $env:npm_config_prefix = "$pwd\node"
-        lisa info zephyr
-        # innosetup-compiler lisaiss.iss --O=lisa-standalone-${{ matrix.dist_suffix }}${{ matrix.format }}
+        zx prepack.mjs 
+        innosetup-compiler lisaiss.iss --O=lisa-standalone-${{ matrix.dist_suffix }}${{ matrix.format }}
 
-   # - name: Upload artifact
-   #   uses: actions/upload-artifact@v2
-   #   with:
-   #     name: lisa-standalone-${{ matrix.dist_suffix }}
-   #     path: lisa-standalone-${{ matrix.dist_suffix }}${{ matrix.format }}
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: lisa-standalone-${{ matrix.dist_suffix }}
+        path: lisa-standalone-${{ matrix.dist_suffix }}${{ matrix.format }}
 
   test-bash:
     needs: bundle-bash
