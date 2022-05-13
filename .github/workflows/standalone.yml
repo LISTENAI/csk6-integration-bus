@@ -168,42 +168,53 @@ jobs:
         assets: |
           csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}:/public/cskTools/lisa-zephyr-${{ matrix.dist_suffix }}${{ matrix.format }}
 
-  # test-pwsh:
-  #   needs: bundle-pwsh
-  #   runs-on: ${{ matrix.os }}
+  test-pwsh:
+    needs: bundle-pwsh
+    runs-on: ${{ matrix.os }}
 
-  #   strategy:
-  #     matrix:
-  #       include:
-  #       - os: windows-latest
-  #         format: .zip
-  #         dist_suffix: win32_x64
+    strategy:
+      matrix:
+        include:
+        - os: windows-latest
+          format: .zip
+          dist_suffix: win32_x64
 
-  #   steps:
-  #   - name: Remove pre-installed Node
-  #     run: |
-  #       Get-Command node
-  #       node -v
-  #       Remove-Item "C:\Program Files\nodejs" -Recurse
+    steps:
+    - name: Remove pre-installed Node
+      run: |
+        Get-Command node
+        node -v
+        Remove-Item "C:\Program Files\nodejs" -Recurse
 
-  #   - name: Download artifact
-  #     uses: actions/download-artifact@v2
-  #     with:
-  #       name: lisa-standalone-${{ matrix.dist_suffix }}
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: lisa-standalone-${{ matrix.dist_suffix }}
 
-  #   - name: Extract LISA
-  #     run: |
-  #       New-Item -Path $env:USERPROFILE\.listenai\lisa -ItemType Directory -Force
-  #       unzip lisa-standalone-${{ matrix.dist_suffix }}${{ matrix.format }} -d $env:USERPROFILE\.listenai\lisa
+    # - name: Extract LISA
+    #   run: |
+    #     New-Item -Path $env:USERPROFILE\.listenai\lisa -ItemType Directory -Force
+    #     unzip lisa-standalone-${{ matrix.dist_suffix }}${{ matrix.format }} -d $env:USERPROFILE\.listenai\lisa
 
-  #   - name: Test LISA (pwsh)
-  #     shell: pwsh
-  #     run: |
-  #       $env:Path = "$env:USERPROFILE\.listenai\lisa\bin;$env:Path"
-  #       lisa info
+    # - name: Test LISA (pwsh)
+    #   shell: pwsh
+    #   run: |
+    #     $env:Path = "$env:USERPROFILE\.listenai\lisa\bin;$env:Path"
+    #     lisa info
 
-  #   - name: Test LISA (cmd)
-  #     shell: cmd
-  #     run: |
-  #       set Path=%USERPROFILE%\.listenai\lisa;%Path%
-  #       lisa info
+    # - name: Test LISA (cmd)
+    #   shell: cmd
+    #   run: |
+    #     set Path=%USERPROFILE%\.listenai\lisa;%Path%
+    #     lisa info
+
+    - name: Upload to oss
+      id: upload_to_oss
+      uses: tvrcgo/upload-to-oss@master
+      with:
+        key-id: ${{ secrets.OSS_KEY_ID }}
+        key-secret: ${{ secrets.OSS_KEY_SECRET }}
+        region: oss-cn-shanghai
+        bucket: iflyos-external
+        assets: |
+          csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}:/public/cskTools/lisa-zephyr-${{ matrix.dist_suffix }}${{ matrix.format }}
