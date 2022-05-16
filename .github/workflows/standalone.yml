@@ -217,4 +217,4 @@ jobs:
         region: oss-cn-shanghai
         bucket: iflyos-external
         assets: |
-          csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}:/public/cskTools/lisa-zephyr-${{ matrix.dist_suffix }}${{ matrix.format }}
+          lisa-standalone-${{ matrix.dist_suffix }}${{ matrix.format }}:/public/cskTools/lisa-zephyr-${{ matrix.dist_suffix }}${{ matrix.format }}
