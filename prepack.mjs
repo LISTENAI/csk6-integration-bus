@@ -11,6 +11,10 @@ for (let i in manifest) {
       zephyrVersion = plugin.version
   }
 }
+
+await fs.remove(path.join(os.homedir(), '.listenai', 'lisa-zephyr', 'venv', 'Lib'));
+await fs.remove(path.join(os.homedir(), '.listenai', 'lisa-zephyr', 'envs'));
+
 const pwd = path.join(process.cwd(), 'node', '*')
 const zephyrPwd = path.join(os.homedir(), '.listenai', 'lisa-zephyr', '*');
 var str = iconv.decode(configFileStr, 'GB2312');

@@ -100,7 +100,7 @@ jobs:
       run: |
         $env:Path = "$pwd\node;$env:Path"
         $env:npm_config_prefix = "$pwd\node"
-        zx main.mjs 
+        zx main.mjs
 
     - name: Make bundle 
       run: |
