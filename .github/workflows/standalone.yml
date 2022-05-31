@@ -95,7 +95,6 @@ jobs:
         npm install -g innosetup-compiler iconv-lite
         npm install iconv-lite
         
-
     - name: Install Plugins
       run: |
         $env:Path = "$pwd\node;$env:Path"

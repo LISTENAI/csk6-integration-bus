@@ -8,6 +8,8 @@ for (let i in manifest) {
   await lpmInstall(plugin.name, plugin.version);
 }
 
+await $`lisa zep use-env csk6`
+
 async function lpmInstall(name, version) {
   await $`lisa install ${name}@${version} -g  --registry=https://registry-lpm.listenai.com `
 }
