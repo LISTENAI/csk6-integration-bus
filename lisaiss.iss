@@ -39,8 +39,8 @@ Source: "###zephyrPwd###"; DestDir: "{app}\lisa-zephyr"; Flags: ignoreversion re
 [Tasks]
 Name: modifypath; Description:  &{cm:AddPath}; Flags: checkablealone
 [Run]
-;Filename: "{app}\installerScripts\install.bat"; Description: "å¯åŠ¨å®‰è£…ååˆå§‹åŒ–"; StatusMsg: "æ­£åœ¨æ‰§è¡Œå®‰è£…å[install]è¿›ç¨‹ï¼Œè¯·ç¨å€™..."; Flags: skipifdoesntexist runhidden
-;Filename: "{app}\installerScripts\info.bat"; Description: "å¯åŠ¨å®‰è£…ååˆå§‹åŒ–"; StatusMsg: "æ­£åœ¨æ‰§è¡Œå®‰è£…å[info]è¿›ç¨‹ï¼Œè¯·ç¨å€™..."; Flags: skipifdoesntexist runhidden
+;Filename: "{app}\installerScripts\install.bat"; Description: "Æô¶¯°²×°ºó³õÊ¼»¯"; StatusMsg: "ÕıÔÚÖ´ĞĞ°²×°ºó[install]½ø³Ì£¬ÇëÉÔºò..."; Flags: skipifdoesntexist runhidden
+;Filename: "{app}\installerScripts\info.bat"; Description: "Æô¶¯°²×°ºó³õÊ¼»¯"; StatusMsg: "ÕıÔÚÖ´ĞĞ°²×°ºó[info]½ø³Ì£¬ÇëÉÔºò..."; Flags: skipifdoesntexist runhidden
 Filename: "cmd.exe"; Parameters: "/c lisa zep install"; Flags: nowait postinstall skipifsilent runascurrentuser; 
 
 [Code]
@@ -54,7 +54,7 @@ function ModPathDir(): TArrayOfString;
 var
   Dir:	TArrayOfString;
 begin
-  setArrayLength(Dir, 1)  //æ­¤å¤„çš„1ä»£è¡¨æ·»åŠ 1ä¸ªè·¯å¾„
+  setArrayLength(Dir, 1)  //´Ë´¦µÄ1´ú±íÌí¼Ó1¸öÂ·¾¶
   Dir[0] := ExpandConstant('{app}\lisa\bin');
   Result := Dir;
 end;
@@ -68,27 +68,27 @@ begin
   oldpath := oldpath + ';';
   i := 0;
   while (Pos(';', oldpath) > 0) do begin
-    //è·å–Pathè·¯å¾„ä¸­çš„ä¸€ä¸ªè·¯å¾„ï¼Œå¹¶åˆ¤æ–­ä¸è¦æ·»åŠ çš„è·¯å¾„æ˜¯å¦ç›¸ç­‰
+    //»ñÈ¡PathÂ·¾¶ÖĞµÄÒ»¸öÂ·¾¶£¬²¢ÅĞ¶ÏÓëÒªÌí¼ÓµÄÂ·¾¶ÊÇ·ñÏàµÈ
     SetArrayLength(pathArr, i+1);
     pathArr[i] := Copy(oldpath, 0, Pos(';', oldpath)-1);
     oldpath := Copy(oldpath, Pos(';', oldpath)+1, Length(oldpath));
     i := i + 1;
-    if addPath = pathArr[i-1] then begin //è‹¥è·¯å¾„å·²å­˜åœ¨
-      if IsUninstaller() = true then begin  //è‹¥ä¸ºå¸è½½ï¼Œåˆ™åˆ é™¤ç›®å½•
+    if addPath = pathArr[i-1] then begin //ÈôÂ·¾¶ÒÑ´æÔÚ
+      if IsUninstaller() = true then begin  //ÈôÎªĞ¶ÔØ£¬ÔòÉ¾³ıÄ¿Â¼
         continue;
-      end else begin  //è‹¥ä¸ºå®‰è£…ï¼Œåˆ™åœæ­¢é‡å¤æ·»åŠ è·¯å¾„
+      end else begin  //ÈôÎª°²×°£¬ÔòÍ£Ö¹ÖØ¸´Ìí¼ÓÂ·¾¶
         abort;
       end;
     end;
-    //å°†æ‰€æœ‰åº”ä¿ç•™çš„è·¯å¾„å­˜å…¥newpath
+    //½«ËùÓĞÓ¦±£ÁôµÄÂ·¾¶´æÈënewpath
     if i = 1 then begin
       newpath := pathArr[i-1];
     end else begin
       newpath := newpath + ';' + pathArr[i-1];
     end;
   end; 
-  // è·å¾—Pathæ–°è·¯å¾„newpath
-  if IsUninstaller() = false then  //è‹¥ä¸ºå®‰è£…ï¼Œåˆ™åŠ å…¥æ­¤è·¯å¾„
+  // »ñµÃPathĞÂÂ·¾¶newpath
+  if IsUninstaller() = false then  //ÈôÎª°²×°£¬Ôò¼ÓÈë´ËÂ·¾¶
     newpath := addPath + ';' + newpath;
     Result := newpath
 end;
@@ -103,22 +103,22 @@ var
   pathArr:	TArrayOfString;
   pathdir:	TArrayOfString;
 begin  	
-	pathdir := ModPathDir();  //è·å–è½¯ä»¶å®‰è£…è·¯å¾„åˆ°pathdir
-	for d := 0 to GetArrayLength(pathdir)-1 do begin //é€ä¸€æ·»åŠ è·¯å¾„
-   //è‹¥ä¸ºwinNTå†…æ ¸ã€‚winXP,win7,win8,win10éƒ½æœ‰winNTå†…æ ¸        
+	pathdir := ModPathDir();  //»ñÈ¡Èí¼ş°²×°Â·¾¶µ½pathdir
+	for d := 0 to GetArrayLength(pathdir)-1 do begin //ÖğÒ»Ìí¼ÓÂ·¾¶
+   //ÈôÎªwinNTÄÚºË¡£winXP,win7,win8,win10¶¼ÓĞwinNTÄÚºË        
 		if UsingWinNT() = true then begin
-      //æ·»åŠ æˆ–åˆ é™¤ç”¨æˆ·ç¯å¢ƒå˜é‡Pathä¸­çš„è·¯å¾„
-			RegQueryStringValue(HKEY_CURRENT_USER, 'Environment', 'Path', oldpath);//è·å–å½“å‰è·¯å¾„ 
-			newpath := getNewPath(oldpath,pathdir[d]);                             //è·å–æ·»åŠ è·¯å¾„åçš„æ–°è·¯å¾„ 			
-			RegWriteStringValue(HKEY_CURRENT_USER, 'Environment', 'Path', newpath);// å°†æ–°è·¯å¾„æ·»åŠ å†™å…¥ç¯å¢ƒå˜é‡ä¸­
-      //æ·»åŠ æˆ–åˆ é™¤ç”¨æˆ·ç¯å¢ƒå˜é‡Pathä¸­çš„è·¯å¾„
-     	//è·å–å½“å‰è·¯å¾„
+      //Ìí¼Ó»òÉ¾³ıÓÃ»§»·¾³±äÁ¿PathÖĞµÄÂ·¾¶
+			RegQueryStringValue(HKEY_CURRENT_USER, 'Environment', 'Path', oldpath);//»ñÈ¡µ±Ç°Â·¾¶ 
+			newpath := getNewPath(oldpath,pathdir[d]);                             //»ñÈ¡Ìí¼ÓÂ·¾¶ºóµÄĞÂÂ·¾¶ 			
+			RegWriteStringValue(HKEY_CURRENT_USER, 'Environment', 'Path', newpath);// ½«ĞÂÂ·¾¶Ìí¼ÓĞ´Èë»·¾³±äÁ¿ÖĞ
+      //Ìí¼Ó»òÉ¾³ıÓÃ»§»·¾³±äÁ¿PathÖĞµÄÂ·¾¶
+     	//»ñÈ¡µ±Ç°Â·¾¶
 			RegQueryStringValue(HKEY_LOCAL_MACHINE, 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'Path', oldpath);
-      newpath := getNewPath(oldpath,pathdir[d]);                             //è·å–æ·»åŠ è·¯å¾„åçš„æ–°è·¯å¾„
-			// å°†æ–°è·¯å¾„æ·»åŠ å†™å…¥ç¯å¢ƒå˜é‡ä¸­
+      newpath := getNewPath(oldpath,pathdir[d]);                             //»ñÈ¡Ìí¼ÓÂ·¾¶ºóµÄĞÂÂ·¾¶
+			// ½«ĞÂÂ·¾¶Ìí¼ÓĞ´Èë»·¾³±äÁ¿ÖĞ
 			RegWriteStringValue(HKEY_LOCAL_MACHINE, 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'Path', newpath);   
 
-		//è‹¥ä¸ºwin9Xå†…æ ¸ï¼Œå¯èƒ½åªæ·»åŠ å…¥ç³»ç»Ÿç¯å¢ƒå˜é‡Path
+		//ÈôÎªwin9XÄÚºË£¬¿ÉÄÜÖ»Ìí¼ÓÈëÏµÍ³»·¾³±äÁ¿Path
 		end else begin
 
 			// Convert to shortened dirname
