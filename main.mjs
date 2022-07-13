@@ -11,5 +11,6 @@ for (let i in manifest) {
 await $`lisa zep use-env csk6`
 
 async function lpmInstall(name, version) {
-  await $`lisa install ${name}@${version} -g  --registry=https://registry-lpm.listenai.com `
+  const command = `lisa install ${name}@${version} -g  --registry=https://registry-lpm.listenai.com `
+  await $`${command}`
 }
