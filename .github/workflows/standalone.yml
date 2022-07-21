@@ -60,61 +60,61 @@ jobs:
         name: csk-integration-bus-${{ matrix.dist_suffix }}
         path: csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
 
-  bundle-pwsh:
-    runs-on: ${{ matrix.os }}
+  # bundle-pwsh:
+  #   runs-on: ${{ matrix.os }}
 
-    strategy:
-      matrix:
-        include:
-        - os: windows-latest
-          format: .zip
-          node_suffix: win-x64
-          dist_suffix: win32_x64
+  #   strategy:
+  #     matrix:
+  #       include:
+  #       - os: windows-latest
+  #         format: .zip
+  #         node_suffix: win-x64
+  #         dist_suffix: win32_x64
 
-    steps:
-    - uses: actions/checkout@v2
+  #   steps:
+  #   - uses: actions/checkout@v2
 
-    - name: Download Node distribution
-      run: Invoke-WebRequest https://nodejs.org/dist/${{ env.node_ver }}/node-${{ env.node_ver }}-${{ matrix.node_suffix }}${{ matrix.format }} -OutFile node-${{ env.node_ver }}-${{ matrix.node_suffix }}${{ matrix.format }}
+  #   - name: Download Node distribution
+  #     run: Invoke-WebRequest https://nodejs.org/dist/${{ env.node_ver }}/node-${{ env.node_ver }}-${{ matrix.node_suffix }}${{ matrix.format }} -OutFile node-${{ env.node_ver }}-${{ matrix.node_suffix }}${{ matrix.format }}
 
-    - name: Extract Node
-      run: |
-        unzip node-${{ env.node_ver }}-${{ matrix.node_suffix }}${{ matrix.format }}
-        mv node-${{ env.node_ver }}-${{ matrix.node_suffix }} node
+  #   - name: Extract Node
+  #     run: |
+  #       unzip node-${{ env.node_ver }}-${{ matrix.node_suffix }}${{ matrix.format }}
+  #       mv node-${{ env.node_ver }}-${{ matrix.node_suffix }} node
 
-    - name: Install LISA && dependencies
-      run: |
-        $env:Path = "$pwd\node;$env:Path"
-        $env:npm_config_prefix = "$pwd\node"
-        npm prefix -g
-        npm root -g
-        npm bin -g
-        npm i -g zx
-        npm install -g @listenai/lisa@beta
-        npm install -g yarn
-        npm install -g innosetup-compiler iconv-lite
-        npm install iconv-lite
+  #   - name: Install LISA && dependencies
+  #     run: |
+  #       $env:Path = "$pwd\node;$env:Path"
+  #       $env:npm_config_prefix = "$pwd\node"
+  #       npm prefix -g
+  #       npm root -g
+  #       npm bin -g
+  #       npm i -g zx
+  #       npm install -g @listenai/lisa@beta
+  #       npm install -g yarn
+  #       npm install -g innosetup-compiler iconv-lite
+  #       npm install iconv-lite
         
-    - name: Install Plugins
-      run: |
-        $env:Path = "$pwd\node;$env:Path"
-        $env:npm_config_prefix = "$pwd\node"
-        zx main.mjs
+  #   - name: Install Plugins
+  #     run: |
+  #       $env:Path = "$pwd\node;$env:Path"
+  #       $env:npm_config_prefix = "$pwd\node"
+  #       zx main.mjs
 
-    - name: Make bundle 
-      run: |
-        Copy-Item -Path standalone\pwsh -Destination node\bin -Recurse
-        # Compress-Archive -Path node\* -DestinationPath lisa-standalone-${{ matrix.dist_suffix }}${{ matrix.format }}
-        $env:Path = "$pwd\node;$env:Path"
-        $env:npm_config_prefix = "$pwd\node"
-        zx prepack.mjs 
-        innosetup-compiler lisaiss.iss --O=lisa-standalone-${{ matrix.dist_suffix }}${{ matrix.format }}
+  #   - name: Make bundle 
+  #     run: |
+  #       Copy-Item -Path standalone\pwsh -Destination node\bin -Recurse
+  #       # Compress-Archive -Path node\* -DestinationPath lisa-standalone-${{ matrix.dist_suffix }}${{ matrix.format }}
+  #       $env:Path = "$pwd\node;$env:Path"
+  #       $env:npm_config_prefix = "$pwd\node"
+  #       zx prepack.mjs 
+  #       innosetup-compiler lisaiss.iss --O=lisa-standalone-${{ matrix.dist_suffix }}${{ matrix.format }}
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: lisa-standalone-${{ matrix.dist_suffix }}
-        path: lisa-standalone-${{ matrix.dist_suffix }}${{ matrix.format }}
+  #   - name: Upload artifact
+  #     uses: actions/upload-artifact@v2
+  #     with:
+  #       name: lisa-standalone-${{ matrix.dist_suffix }}
+  #       path: lisa-standalone-${{ matrix.dist_suffix }}${{ matrix.format }}
 
   test-bash:
     needs: bundle-bash
@@ -156,39 +156,39 @@ jobs:
         echo $PATH
         lisa info zephyr
 
-    - name: Upload to oss
-      id: upload_to_oss
-      uses: tvrcgo/upload-to-oss@master
-      with:
-        key-id: ${{ secrets.OSS_KEY_ID }}
-        key-secret: ${{ secrets.OSS_KEY_SECRET }}
-        region: oss-cn-shanghai
-        bucket: iflyos-external
-        assets: |
-          csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}:/public/cskTools/lisa-zephyr-${{ matrix.dist_suffix }}${{ matrix.format }}
+    # - name: Upload to oss
+    #   id: upload_to_oss
+    #   uses: tvrcgo/upload-to-oss@master
+    #   with:
+    #     key-id: ${{ secrets.OSS_KEY_ID }}
+    #     key-secret: ${{ secrets.OSS_KEY_SECRET }}
+    #     region: oss-cn-shanghai
+    #     bucket: iflyos-external
+    #     assets: |
+    #       csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}:/public/cskTools/lisa-zephyr-${{ matrix.dist_suffix }}${{ matrix.format }}
 
-  test-pwsh:
-    needs: bundle-pwsh
-    runs-on: ${{ matrix.os }}
+  # test-pwsh:
+  #   needs: bundle-pwsh
+  #   runs-on: ${{ matrix.os }}
 
-    strategy:
-      matrix:
-        include:
-        - os: windows-latest
-          format: .zip
-          dist_suffix: win32_x64
+  #   strategy:
+  #     matrix:
+  #       include:
+  #       - os: windows-latest
+  #         format: .zip
+  #         dist_suffix: win32_x64
 
-    steps:
-    - name: Remove pre-installed Node
-      run: |
-        Get-Command node
-        node -v
-        Remove-Item "C:\Program Files\nodejs" -Recurse
+  #   steps:
+  #   - name: Remove pre-installed Node
+  #     run: |
+  #       Get-Command node
+  #       node -v
+  #       Remove-Item "C:\Program Files\nodejs" -Recurse
 
-    - name: Download artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: lisa-standalone-${{ matrix.dist_suffix }}
+  #   - name: Download artifact
+  #     uses: actions/download-artifact@v2
+  #     with:
+  #       name: lisa-standalone-${{ matrix.dist_suffix }}
 
     # - name: Extract LISA
     #   run: |
@@ -207,13 +207,13 @@ jobs:
     #     set Path=%USERPROFILE%\.listenai\lisa;%Path%
     #     lisa info
 
-    - name: Upload to oss
-      id: upload_to_oss
-      uses: tvrcgo/upload-to-oss@master
-      with:
-        key-id: ${{ secrets.OSS_KEY_ID }}
-        key-secret: ${{ secrets.OSS_KEY_SECRET }}
-        region: oss-cn-shanghai
-        bucket: iflyos-external
-        assets: |
-          lisa-standalone-${{ matrix.dist_suffix }}${{ matrix.format }}:/public/cskTools/lisa-zephyr-${{ matrix.dist_suffix }}${{ matrix.format }}
+    # - name: Upload to oss
+    #   id: upload_to_oss
+    #   uses: tvrcgo/upload-to-oss@master
+    #   with:
+    #     key-id: ${{ secrets.OSS_KEY_ID }}
+    #     key-secret: ${{ secrets.OSS_KEY_SECRET }}
+    #     region: oss-cn-shanghai
+    #     bucket: iflyos-external
+    #     assets: |
+    #       lisa-standalone-${{ matrix.dist_suffix }}${{ matrix.format }}:/public/cskTools/lisa-zephyr-${{ matrix.dist_suffix }}${{ matrix.format }}
