@@ -38,6 +38,15 @@ lisa_tar() {
   fi
 }
 
+lisa_unzstd() {
+  if lisa_has "unzstd" && lisa_has "tar"; then
+    command tar -I zstd -xf "$@"
+  else
+    lisa_echo >&2 'You need tar and zstd to install Lisa'
+    exit 1
+  fi
+}
+
 lisa_shell_command_link() {
   lnpath="/usr/local/bin/lisa"
   if [ -L "$lnpath" ]; then
@@ -69,6 +78,35 @@ lisa_get_format() {
   lisa_echo "${LISA_FORMAT-}"
 }
 
+lisa_inst_requirements() {
+  if lisa_has "apt"; then
+    sudo apt install -y gpg zstd
+    if [ $? -ne 0 ]; then
+      lisa_echo "Oops...something went wrong when installing required application(s)"
+      exit 1
+    fi
+  elif lisa_has "yum"; then
+    sudo yum install -y gpg zstd
+    if [ $? -ne 0 ]; then
+      lisa_echo "Oops...something went wrong when installing required application(s)"
+      exit 1
+    fi
+  else
+    lisa_echo "No apt or yum found in your system, you need to install one."
+    exit 1
+  fi
+}
+
+lisa_is_gpgkey_imported() {
+  gpg --list-keys |grep "6DE025312AE473230DA39108E9092D29A4E4A547" >/dev/null 2>&1
+  return $?
+}
+
+lisa_verify_signature() {
+  gpg --verify "$@" |grep "Good signature"
+  return $?
+}
+
 lisa_do_install() {
   local INSTALL_DIR
   INSTALL_DIR="$(lisa_default_install_dir)"
@@ -88,15 +126,65 @@ lisa_do_install() {
   local LISA_RC
   LISA_RC="${HOME}/ifly/lisa/standalone/bash/.lisarc"
 
+  local LISA_SDK_SOURCE
+  LISA_SDK_SOURCE="https://cdn.iflyos.cn/public/lisa-zephyr-dist/lisa-zephyr-sdk-latest.tar.zst"
+
+  local LISA_SDK_SIG
+  LISA_SDK_SOURCE="https://cdn.iflyos.cn/public/lisa-zephyr-dist/lisa-zephyr-sdk-latest.tar.zst.sig"
+
+  local LISA_WHL_SOURCE
+  LISA_WHL_SOURCE="https://cdn.iflyos.cn/public/lisa-zephyr-dist/lisa-zephyr-whl-latest.tar.zst"
+
+  local LISA_WHL_SIG
+  LISA_WHL_SIG="https://cdn.iflyos.cn/public/lisa-zephyr-dist/lisa-zephyr-whl-latest.tar.zst.sig"
+
   if ! [ -d "${INSTALL_DIR}" ]; then
     command mkdir -p $INSTALL_DIR
   fi
 
-  lisa_echo "=> Downloading Lisa to '$INSTALL_DIR'"
+  lisa_is_gpgkey_imported
+  local GPGCHECK=$?
+
+  lisa_echo "=> Installing zstd & gpg"
+  lisa_inst_requirements
+
+  lisa_echo "=> Downloading Lisa"
   lisa_download -s "$LISA_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}"
-  lisa_echo "=> tar to '$INSTALL_DIR'"
+  lisa_echo "=> Downloading SDK package"
+  lisa_download -s "$LISA_SDK_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst"
+
+  lisa_echo "=> Downloading required python wheel package"
+  lisa_download -s "$LISA_WHL_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-whl-latest.tar.zst"
+
+  if [ $GPGCHECK -eq 0 ]; then
+    lisa_echo "Downloading signature and will check the integrity of resource package"
+    lisa_download -s "$LISA_SDK_SIG" -o "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst.sig"
+    lisa_download -s "$LISA_WHL_SIG" -o "$INSTALL_DIR/lisa-zephyr-whl-latest.tar.zst.sig"
+    lisa_verify_signature "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst.sig" "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst"
+    local SDK_SIG_OK=$?
+    lisa_verify_signature "$INSTALL_DIR/lisa-zephyr-whl-latest.tar.zst.sig" "$INSTALL_DIR/lisa-zephyr-whl-latest.tar.zst"
+    local WHL_SIG_OK=$?
+    if [ $SDK_SIG_OK -ne 0 ] || [ $WHL_SIG_OK -ne 0 ]; then
+      lisa_echo "Resource packages integrity check failed!"
+      exit 1
+    fi
+  fi
+
+  lisa_echo "=> Extracting LISA to '$INSTALL_DIR'"
   lisa_tar "$INSTALL_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}" -C "$INSTALL_DIR"
+  lisa_echo "=> Extracting SDK package"
+  mkdir -p "$INSTALL_DIR/csk-sdk"
+  lisa_unzstd "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst" -C "$INSTALL_DIR/csk-sdk"
+  lisa_echo "=> Extracting WHL package"
+  mkdir -p "$INSTALL_DIR/lisa-zephyr/whl"
+  lisa_unzstd "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst" -C "$INSTALL_DIR/lisa-zephyr/whl"
   lisa_shell_command_link
+
+  lisa_echo "Preparing workspace, just for you!"
+  lisa zep install
+  lisa zep sdk set "$INSTALL_DIR/csk-sdk/zephyr"
+  lisa zep use-env csk6
+  
   lisa_echo "=> Success! try run command 'lisa info zephyr'"
 }
 
