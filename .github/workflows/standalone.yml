@@ -52,7 +52,12 @@ jobs:
     - name: Make bundle
       run: |
         cp -vR standalone/bash node/libexec
-        cd node && tar caf ../csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }} .
+        cd node
+        mkdir res
+        wget -o res/listenai_public_key.asc https://cdn.iflyos.cn/public/lisa-zephyr-dist/listenai_public_key.asc
+        wget -o res/sdk.tar.zst https://cdn.iflyos.cn/public/lisa-zephyr-dist/lisa-zephyr-sdk-latest.tar.zst
+        wget -o res/whl.tar.zst https://cdn.iflyos.cn/public/lisa-zephyr-dist/lisa-zephyr-whl.tar.zst
+        tar caf ../csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }} .
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
