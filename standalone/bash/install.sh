@@ -103,7 +103,7 @@ lisa_is_gpgkey_imported() {
 }
 
 lisa_verify_signature() {
-  gpg --verify "$@" |grep "Good signature"
+  gpg --verify "$@" >/dev/null 2>&1
   return $?
 }
 
@@ -130,7 +130,7 @@ lisa_do_install() {
   LISA_SDK_SOURCE="https://cdn.iflyos.cn/public/lisa-zephyr-dist/lisa-zephyr-sdk-latest.tar.zst"
 
   local LISA_SDK_SIG
-  LISA_SDK_SOURCE="https://cdn.iflyos.cn/public/lisa-zephyr-dist/lisa-zephyr-sdk-latest.tar.zst.sig"
+  LISA_SDK_SIG="https://cdn.iflyos.cn/public/lisa-zephyr-dist/lisa-zephyr-sdk-latest.tar.zst.sig"
 
   local LISA_WHL_SOURCE
   LISA_WHL_SOURCE="https://cdn.iflyos.cn/public/lisa-zephyr-dist/lisa-zephyr-whl-latest.tar.zst"
@@ -148,16 +148,15 @@ lisa_do_install() {
   lisa_echo "=> Installing zstd & gpg"
   lisa_inst_requirements
 
-  lisa_echo "=> Downloading Lisa"
+  lisa_echo "=> Downloading LISA"
   lisa_download -s "$LISA_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}"
   lisa_echo "=> Downloading SDK package"
   lisa_download -s "$LISA_SDK_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst"
-
   lisa_echo "=> Downloading required python wheel package"
   lisa_download -s "$LISA_WHL_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-whl-latest.tar.zst"
 
   if [ $GPGCHECK -eq 0 ]; then
-    lisa_echo "Downloading signature and will check the integrity of resource package"
+    lisa_echo "=> Checking integrity of resource package"
     lisa_download -s "$LISA_SDK_SIG" -o "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst.sig"
     lisa_download -s "$LISA_WHL_SIG" -o "$INSTALL_DIR/lisa-zephyr-whl-latest.tar.zst.sig"
     lisa_verify_signature "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst.sig" "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst"
@@ -173,17 +172,19 @@ lisa_do_install() {
   lisa_echo "=> Extracting LISA to '$INSTALL_DIR'"
   lisa_tar "$INSTALL_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}" -C "$INSTALL_DIR"
   lisa_echo "=> Extracting SDK package"
-  mkdir -p "$INSTALL_DIR/csk-sdk"
-  lisa_unzstd "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst" -C "$INSTALL_DIR/csk-sdk"
+  mkdir -p "$INSTALL_DIR/../csk-sdk"
+  lisa_unzstd "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst" -C "$INSTALL_DIR/../csk-sdk"
   lisa_echo "=> Extracting WHL package"
-  mkdir -p "$INSTALL_DIR/lisa-zephyr/whl"
-  lisa_unzstd "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst" -C "$INSTALL_DIR/lisa-zephyr/whl"
+  mkdir -p "$INSTALL_DIR/../lisa-zephyr/whl"
+  lisa_unzstd "$INSTALL_DIR/lisa-zephyr-whl-latest.tar.zst" -C "$INSTALL_DIR/../lisa-zephyr/whl"
   lisa_shell_command_link
 
-  lisa_echo "Preparing workspace, just for you!"
-  lisa zep install
-  lisa zep sdk set "$INSTALL_DIR/csk-sdk/zephyr"
-  lisa zep use-env csk6
+  lisa_echo "=> Preparing workspace specially for you"
+  export LISA_HOME=$INSTALL_DIR/../
+  export LISA_PREFIX=$INSTALL_DIR
+  $INSTALL_DIR/libexec/lisa zep install
+  $INSTALL_DIR/libexec/lisa zep use-sdk "$INSTALL_DIR/../csk-sdk/zephyr"
+  $INSTALL_DIR/libexec/lisa zep use-env csk6
   
   lisa_echo "=> Success! try run command 'lisa info zephyr'"
 }
