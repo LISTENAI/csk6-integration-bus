@@ -50,6 +50,15 @@ lisa_unzstd() {
   fi
 }
 
+lisa_shell_command_link() {
+  lnpath="/usr/local/bin/lisa"
+  if [ -L "$lnpath" ]; then
+    rm $lnpath;
+  fi
+  lisa_echo "=> ${LISA_BIN}/lisa -> $lnpath"
+  sudo ln -s "${LISA_BIN}/lisa" $lnpath
+}
+
 lisa_get_os() {
   local LISA_UNAME
   LISA_UNAME="$(command uname -a)"
@@ -178,10 +187,16 @@ lisa_do_install() {
   lisa_unzstd "$INSTALL_DIR/lisa-zephyr-whl-latest.tar.zst" "$INSTALL_DIR/../lisa-zephyr/whl"
 
   lisa_echo "=> Preparing workspace specially for you"
+  lisa_shell_command_link
   export LISA_HOME=$INSTALL_DIR/../
   export LISA_PREFIX=$INSTALL_DIR
   $INSTALL_DIR/libexec/lisa zep install
   $INSTALL_DIR/libexec/lisa zep use-sdk "$INSTALL_DIR/../csk-sdk/zephyr"
+  sudo sed -i '/^LISA_HOME=/d' /etc/environment
+  sudo sed -i '/^LISA_PREFIX=/d' /etc/environment
+  echo "LISA_HOME=\"${LISA_HOME}\"" |sudo tee -a /etc/environment >/dev/null 2>&1
+  echo "LISA_PREFIX=\"${LISA_PREFIX}\"" |sudo tee -a /etc/environment >/dev/null 2>&1
+  source /etc/environment
   
   lisa_echo "=> Success! try run command 'lisa info zephyr'"
 }
