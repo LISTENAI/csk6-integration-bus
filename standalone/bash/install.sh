@@ -26,12 +26,15 @@ lisa_download() {
                             -e 's/-o /-O /' \
                             -e 's/-C - /-c /')
     eval wget $ARGS
+  else
+    lisa_echo "You need either curl or wget to download packages"
+    exit 1
   fi
 }
 
 lisa_tar() {
   if lisa_has "tar"; then
-    command tar xf "$@"
+    command pv "$1" |tar xJf - -C "$2"
   else
     lisa_echo >&2 'You need tar to install Lisa'
     exit 1
@@ -40,20 +43,11 @@ lisa_tar() {
 
 lisa_unzstd() {
   if lisa_has "unzstd" && lisa_has "tar"; then
-    command tar -I zstd -xf "$@"
+    command pv "$1" |tar -I zstd -xf -  -C "$2"
   else
     lisa_echo >&2 'You need tar and zstd to install Lisa'
     exit 1
   fi
-}
-
-lisa_shell_command_link() {
-  lnpath="/usr/local/bin/lisa"
-  if [ -L "$lnpath" ]; then
-    rm $lnpath;
-  fi
-  lisa_echo "=> ${LISA_BIN}/lisa -> $lnpath"
-  sudo ln -s "${LISA_BIN}/lisa" $lnpath
 }
 
 lisa_get_os() {
@@ -80,19 +74,24 @@ lisa_get_format() {
 
 lisa_inst_requirements() {
   if lisa_has "apt"; then
-    sudo apt install -y gpg zstd
+    sudo apt install -y gpg zstd pv
     if [ $? -ne 0 ]; then
       lisa_echo "Oops...something went wrong when installing required application(s)"
       exit 1
     fi
   elif lisa_has "yum"; then
-    sudo yum install -y gpg zstd
+    sudo yum install -y epel-release
+    if [ $? -ne 0 ]; then
+      lisa_echo "Oops...something went wrong when enabling EPEL repository"
+      exit 1
+    fi
+    sudo yum install -y gpg zstd pv
     if [ $? -ne 0 ]; then
       lisa_echo "Oops...something went wrong when installing required application(s)"
       exit 1
     fi
   else
-    lisa_echo "No apt or yum found in your system, you need to install one."
+    lisa_echo "No apt or yum found in your system, please install one of them first."
     exit 1
   fi
 }
@@ -170,21 +169,19 @@ lisa_do_install() {
   fi
 
   lisa_echo "=> Extracting LISA to '$INSTALL_DIR'"
-  lisa_tar "$INSTALL_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}" -C "$INSTALL_DIR"
+  lisa_tar "$INSTALL_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}" "$INSTALL_DIR"
   lisa_echo "=> Extracting SDK package"
   mkdir -p "$INSTALL_DIR/../csk-sdk"
-  lisa_unzstd "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst" -C "$INSTALL_DIR/../csk-sdk"
+  lisa_unzstd "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst" "$INSTALL_DIR/../csk-sdk"
   lisa_echo "=> Extracting WHL package"
   mkdir -p "$INSTALL_DIR/../lisa-zephyr/whl"
-  lisa_unzstd "$INSTALL_DIR/lisa-zephyr-whl-latest.tar.zst" -C "$INSTALL_DIR/../lisa-zephyr/whl"
-  lisa_shell_command_link
+  lisa_unzstd "$INSTALL_DIR/lisa-zephyr-whl-latest.tar.zst" "$INSTALL_DIR/../lisa-zephyr/whl"
 
   lisa_echo "=> Preparing workspace specially for you"
   export LISA_HOME=$INSTALL_DIR/../
   export LISA_PREFIX=$INSTALL_DIR
   $INSTALL_DIR/libexec/lisa zep install
   $INSTALL_DIR/libexec/lisa zep use-sdk "$INSTALL_DIR/../csk-sdk/zephyr"
-  $INSTALL_DIR/libexec/lisa zep use-env csk6
   
   lisa_echo "=> Success! try run command 'lisa info zephyr'"
 }
