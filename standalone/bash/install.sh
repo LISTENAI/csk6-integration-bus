@@ -53,7 +53,7 @@ lisa_unzstd() {
 lisa_shell_command_link() {
   lnpath="/usr/local/bin/lisa"
   if [ -L "$lnpath" ]; then
-    rm $lnpath;
+    sudo rm -f $lnpath;
   fi
   lisa_echo "=> ${LISA_BIN}/lisa -> $lnpath"
   sudo ln -s "${LISA_BIN}/lisa" $lnpath
@@ -83,7 +83,7 @@ lisa_get_format() {
 
 lisa_inst_requirements() {
   if lisa_has "apt"; then
-    sudo apt install -y gpg zstd pv
+    sudo apt install -y gpg zstd pv xz-utils
     if [ $? -ne 0 ]; then
       lisa_echo "Oops...something went wrong when installing required application(s)"
       exit 1
@@ -94,7 +94,7 @@ lisa_inst_requirements() {
       lisa_echo "Oops...something went wrong when enabling EPEL repository"
       exit 1
     fi
-    sudo yum install -y gpg zstd pv
+    sudo yum install -y gpg zstd pv xz
     if [ $? -ne 0 ]; then
       lisa_echo "Oops...something went wrong when installing required application(s)"
       exit 1
@@ -159,6 +159,7 @@ lisa_do_install() {
   lisa_echo "=> Installing zstd & gpg"
   lisa_inst_requirements
 
+  echo $LISA_SOURCE
   lisa_echo "=> Downloading LISA"
   lisa_download --progress-bar "$LISA_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}"
   lisa_echo "=> Downloading SDK package"
