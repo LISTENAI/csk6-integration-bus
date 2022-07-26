@@ -126,7 +126,10 @@ lisa_do_install() {
   LISA_FORMAT="$(lisa_get_format)"
 
   local LISA_SOURCE
-  LISA_SOURCE="https://cdn.iflyos.cn/public/cskTools/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}"
+  case "${DOWNLOAD_CHANNEL}" in
+    beta) LISA_SOURCE="https://cdn.iflyos.cn/public/cskTools/lisa-zephyr-${LISA_OS}_x64-${DOWNLOAD_CHANNEL}${LISA_FORMAT}";;
+    *) LISA_SOURCE="https://cdn.iflyos.cn/public/cskTools/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}";;
+  esac
 
   local LISA_BIN
   LISA_BIN="${INSTALL_DIR}/libexec"
@@ -191,6 +194,7 @@ lisa_do_install() {
   export LISA_HOME=$INSTALL_DIR/../
   export LISA_PREFIX=$INSTALL_DIR
   $INSTALL_DIR/libexec/lisa zep install
+  echo "{\"env\":\"csk6\"}" |tee $LISA_HOME/lisa-zephyr/config.json >/dev/null 2>&1
   $INSTALL_DIR/libexec/lisa zep use-sdk "$INSTALL_DIR/../csk-sdk/zephyr"
   sudo sed -i '/^LISA_HOME=/d' /etc/environment
   sudo sed -i '/^LISA_PREFIX=/d' /etc/environment
@@ -200,5 +204,13 @@ lisa_do_install() {
   
   lisa_echo "=> Success! try run command 'lisa info zephyr'"
 }
+
+DOWNLOAD_CHANNEL="stable"
+if [ $# -eq 1 ]; then
+  case "$1" in
+    beta | stable) DOWNLOAD_CHANNEL=$1 ;;
+    *) DOWNLOAD_CHANNEL="stable" ;;
+  esac
+fi
 
 lisa_do_install
