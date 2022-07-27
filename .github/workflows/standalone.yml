@@ -52,6 +52,7 @@ jobs:
     - name: Make bundle
       run: |
         cp -vR standalone/bash node/libexec
+        ls -l
         tar cf node/lisa-zephyr-packages.tar lisa-zephyr/packages
         cd node && tar caf ../csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }} .
 
