@@ -83,7 +83,7 @@ lisa_get_format() {
 
 lisa_inst_requirements() {
   if lisa_has "apt"; then
-    sudo apt install -y gpg zstd pv xz-utils
+    sudo apt install -y gpg zstd pv xz-utils git
     if [ $? -ne 0 ]; then
       lisa_echo "Oops...something went wrong when installing required application(s)"
       exit 1
@@ -94,7 +94,7 @@ lisa_inst_requirements() {
       lisa_echo "Oops...something went wrong when enabling EPEL repository"
       exit 1
     fi
-    sudo yum install -y gpg zstd pv xz
+    sudo yum install -y gpg zstd pv xz git
     if [ $? -ne 0 ]; then
       lisa_echo "Oops...something went wrong when installing required application(s)"
       exit 1
@@ -163,9 +163,11 @@ lisa_do_install() {
   lisa_echo "=> Downloading LISA"
   lisa_download --progress-bar "$LISA_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}"
   lisa_echo "=> Downloading SDK package"
-  lisa_download --progress-bar "$LISA_SDK_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst"
+  #lisa_download --progress-bar "$LISA_SDK_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst"
+  cp -f "/home/listenai/Downloads/lisa-zephyr-sdk-latest.tar.zst" "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst"
   lisa_echo "=> Downloading required python wheel package"
-  lisa_download --progress-bar "$LISA_WHL_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-whl-latest.tar.zst"
+  #lisa_download --progress-bar "$LISA_WHL_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-whl-latest.tar.zst"
+  cp -f "/home/listenai/Downloads/lisa-zephyr-whl-latest.tar.zst" "$INSTALL_DIR/lisa-zephyr-whl-latest.tar.zst"
 
   if [ $GPGCHECK -eq 0 ]; then
     lisa_echo "=> Checking integrity of resource package"
@@ -183,6 +185,8 @@ lisa_do_install() {
 
   lisa_echo "=> Extracting LISA to '$INSTALL_DIR'"
   lisa_tar "$INSTALL_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}" "$INSTALL_DIR"
+  mkdir -p "$INSTALL_DIR/../lisa-zephyr"
+  mv "$INSTALL_DIR/packages" "$INSTALL_DIR/../lisa-zephyr"
   lisa_echo "=> Extracting SDK package"
   mkdir -p "$INSTALL_DIR/../csk-sdk"
   lisa_unzstd "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst" "$INSTALL_DIR/../csk-sdk"
@@ -196,12 +200,19 @@ lisa_do_install() {
   export LISA_PREFIX=$INSTALL_DIR
   $INSTALL_DIR/libexec/lisa zep install
   echo "{\"env\":\"csk6\"}" |tee $LISA_HOME/lisa-zephyr/config.json >/dev/null 2>&1
-  $INSTALL_DIR/libexec/lisa zep use-sdk "$INSTALL_DIR/../csk-sdk/zephyr"
+  $INSTALL_DIR/libexec/lisa zep use-sdk "$INSTALL_DIR/../csk-sdk"
   sudo sed -i '/^LISA_HOME=/d' /etc/environment
   sudo sed -i '/^LISA_PREFIX=/d' /etc/environment
   echo "LISA_HOME=\"${LISA_HOME}\"" |sudo tee -a /etc/environment >/dev/null 2>&1
   echo "LISA_PREFIX=\"${LISA_PREFIX}\"" |sudo tee -a /etc/environment >/dev/null 2>&1
   source /etc/environment
+
+  lisa_echo "=> Some housekeeping"
+  rm -f "$INSTALL_DIR/lisa-zephyr-linux_x64.tar.xz"
+  rm -f "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst"
+  rm -f "$INSTALL_DIR/lisa-zephyr-whl-latest.tar.zst"
+  rm -f "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst.sig"
+  rm -f "$INSTALL_DIR/lisa-zephyr-whl-latest.tar.zst.sig"
   
   lisa_echo "=> Success! try run command 'lisa info zephyr'"
 }
