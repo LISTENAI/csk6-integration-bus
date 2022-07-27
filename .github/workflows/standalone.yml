@@ -48,6 +48,7 @@ jobs:
         export PATH=$PWD/node/bin:$PATH
         export npm_config_prefix=$PWD/node
         zx main.mjs
+        mv $HOME/.listenai/lisa-zephyr/packages $PWD/node
 
     - name: Make bundle
       run: |
