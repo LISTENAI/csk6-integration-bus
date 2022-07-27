@@ -83,7 +83,7 @@ lisa_get_format() {
 
 lisa_inst_requirements() {
   if lisa_has "apt"; then
-    sudo apt install -y gpg zstd pv xz-utils
+    sudo apt install -y gpg zstd pv xz-utils git
     if [ $? -ne 0 ]; then
       lisa_echo "Oops...something went wrong when installing required application(s)"
       exit 1
@@ -94,7 +94,7 @@ lisa_inst_requirements() {
       lisa_echo "Oops...something went wrong when enabling EPEL repository"
       exit 1
     fi
-    sudo yum install -y gpg zstd pv xz
+    sudo yum install -y gpg zstd pv xz git
     if [ $? -ne 0 ]; then
       lisa_echo "Oops...something went wrong when installing required application(s)"
       exit 1
