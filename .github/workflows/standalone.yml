@@ -47,11 +47,11 @@ jobs:
       run: |
         export PATH=$PWD/node/bin:$PATH
         export npm_config_prefix=$PWD/node
+        export LISA_HOME=$PWD/node
         zx main.mjs
 
     - name: Make bundle
       run: |
-        export LISA_HOME=$PWD/node
         cp -vR standalone/bash node/libexec
         cd node && tar caf ../csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }} .
 
