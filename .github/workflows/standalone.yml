@@ -53,6 +53,7 @@ jobs:
         mkdir -p $WORKSPACE/node/lisa-zephyr/packages
         cd $WORKSPACE/node/lisa-zephyr/packages
         lisa install @lisa-env/csk6 --loglevel info
+        ls -l $WORKSPACE/node/lisa-zephyr/packages
         rm -rf $WORKSPACE/node/lisa-zephyr/venv
         cd $WORKSPACE
 
