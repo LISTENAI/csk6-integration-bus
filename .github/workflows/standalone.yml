@@ -45,10 +45,15 @@ jobs:
 
     - name: Install Plugins
       run: |
+        export WORKSPACE=$PWD
         export PATH=$PWD/node/bin:$PATH
         export npm_config_prefix=$PWD/node
         export LISA_HOME=$PWD/node
         zx main.mjs
+        mkdir -p $WORKSPACE/node/lisa-zephyr/packages
+        cd $WORKSPACE/node/lisa-zephyr/packages && lisa install @lisa-env/csk6
+        rm -rf $WORKSPACE/node/lisa-zephyr/venv
+        cd $WORKSPACE
 
     - name: Make bundle
       run: |
