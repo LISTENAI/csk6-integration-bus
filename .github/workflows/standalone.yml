@@ -47,9 +47,9 @@ jobs:
       run: |
         export PATH=$PWD/node/bin:$PATH
         export npm_config_prefix=$PWD/node
-        export LISA_HOME=$PWD/node
-        mkdir -p $LISA_HOME/lisa-zephyr/packages
         zx main.mjs
+        ls -l .
+        ls -l ./packages
 
     - name: Make bundle
       run: |
