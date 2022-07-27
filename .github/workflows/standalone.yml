@@ -51,7 +51,8 @@ jobs:
         export LISA_HOME=$PWD/node
         zx main.mjs
         mkdir -p $WORKSPACE/node/lisa-zephyr/packages
-        cd $WORKSPACE/node/lisa-zephyr/packages && lisa install @lisa-env/csk6
+        cd $WORKSPACE/node/lisa-zephyr/packages
+        lisa install @lisa-env/csk6 --loglevel info
         rm -rf $WORKSPACE/node/lisa-zephyr/venv
         cd $WORKSPACE
 
