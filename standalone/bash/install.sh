@@ -185,8 +185,8 @@ lisa_do_install() {
 
   lisa_echo "=> Extracting LISA to '$INSTALL_DIR'"
   lisa_tar "$INSTALL_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}" "$INSTALL_DIR"
-  mv "$INSTALL_DIR/lisa-zephyr" "$INSTALL_DIR/../lisa-zephyr"
-  rm -rf "$INSTALL_DIR/../lisa-zephyr/venv"
+  mkdir -p "$INSTALL_DIR/../lisa-zephyr"
+  mv "$INSTALL_DIR/packages" "$INSTALL_DIR/../lisa-zephyr"
   lisa_echo "=> Extracting SDK package"
   mkdir -p "$INSTALL_DIR/../csk-sdk"
   lisa_unzstd "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst" "$INSTALL_DIR/../csk-sdk"
