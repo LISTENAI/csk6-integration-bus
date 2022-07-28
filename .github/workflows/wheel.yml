@@ -43,10 +43,6 @@ jobs:
 
     runs-on: ubuntu-22.04
 
-    strategy:
-      matrix:
-        os: [ windows-2022, ubuntu-18.04, ubuntu-20.04, macos-12, macos-11 ]
-
     steps:
       - uses: actions/download-artifact@v3
 
@@ -55,7 +51,7 @@ jobs:
 
       - name: Extract all packages
         run: |
-          7z e packages_${{ matrix.os }}.7z -y -o"./pip_packages"
+          7z e *.7z -y -o"./pip_packages"
 
       - name: Repack merged wheel packages
         run: |
