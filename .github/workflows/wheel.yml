@@ -31,7 +31,7 @@ jobs:
       - name: Pack wheel packages
         uses: montudor/action-zip@v1
         with:
-          args: zip -qq -r packages_${{ matrix.os }}.zip ./pip_packages/*
+          args: zip -qq -r packages_${{ matrix.os }}.zip ./pip_packages
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
