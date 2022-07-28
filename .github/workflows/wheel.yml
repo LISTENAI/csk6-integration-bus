@@ -29,15 +29,15 @@ jobs:
           python -m pip download -r $PWD/pip_requirements/requirements.txt -d ./pip_packages
 
       - name: Pack wheel packages
-        uses: edgarrc/action-7z@v1
+        uses: montudor/action-zip@v1
         with:
-          args: 7z a -t7z -mx=5 packages_${{ matrix.os }}.7z ./pip_packages/*
+          args: zip -qq -r packages_${{ matrix.os }}.zip ./pip_packages/*
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: packages_${{ matrix.os }}
-          path: packages_${{ matrix.os }}.7z
+          path: packages_${{ matrix.os }}.zip
 
   merge-packages:
     needs: build-package
@@ -55,17 +55,17 @@ jobs:
         run: ls -R
 
       - name: Extract all packages
-        uses: edgarrc/action-7z@v1
+        uses: montudor/action-zip@v1
         with:
-          args: 7z x packages_${{ matrix.os }}.7z -y -o"./pip_packages"
+          args: unzip -qq packages_${{ matrix.os }}.zip -d "./pip_packages"
 
       - name: Repack merged wheel packages
-        uses: edgarrc/action-7z@v1
+        uses: montudor/action-zip@v1
         with:
-          args: 7z a -t7z -mx=5 pip_packages.7z ./pip_packages
+          args: zip -qq -r pip_packages.zip ./pip_packages
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: pip_packages
-          path: pip_packages.7z
+          path: pip_packages.zip
