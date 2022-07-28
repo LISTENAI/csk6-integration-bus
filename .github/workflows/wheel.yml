@@ -51,7 +51,7 @@ jobs:
 
       - name: Extract all packages
         run: |
-          7z e *.7z -y -o"./pip_packages"
+          7z e */*.7z -y -o"./pip_packages"
 
       - name: Repack merged wheel packages
         run: |
