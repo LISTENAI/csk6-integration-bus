@@ -39,33 +39,33 @@ jobs:
           name: packages_${{ matrix.os }}
           path: packages_${{ matrix.os }}.7z
 
-    merge-packages:
-      needs: build-package
+  merge-packages:
+    needs: build-package
 
-      runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04
 
-      strategy:
-        matrix:
-          os: [ windows-2022, ubuntu-18.04, ubuntu-20.04, macos-12, macos-11 ]
+    strategy:
+      matrix:
+        os: [ windows-2022, ubuntu-18.04, ubuntu-20.04, macos-12, macos-11 ]
 
-      steps:
-        - uses: actions/download-artifact@v3
+    steps:
+      - uses: actions/download-artifact@v3
 
-        - name: Display structure of downloaded files
-          run: ls -R
+      - name: Display structure of downloaded files
+        run: ls -R
 
-        - name: Extract all packages
-          uses: edgarrc/action-7z@v1
-          with:
-            args: 7z x packages_${{ matrix.os }}.7z -y -o"./pip_packages"
+      - name: Extract all packages
+        uses: edgarrc/action-7z@v1
+        with:
+          args: 7z x packages_${{ matrix.os }}.7z -y -o"./pip_packages"
 
-        - name: Repack merged wheel packages
-          uses: edgarrc/action-7z@v1
-          with:
-            args: 7z a -t7z -mx=5 pip_packages.7z ./pip_packages
+      - name: Repack merged wheel packages
+        uses: edgarrc/action-7z@v1
+        with:
+          args: 7z a -t7z -mx=5 pip_packages.7z ./pip_packages
 
-        - name: Upload artifacts
-          uses: actions/upload-artifact@v2
-          with:
-            name: pip_packages
-            path: pip_packages.7z
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: pip_packages
+          path: pip_packages.7z
