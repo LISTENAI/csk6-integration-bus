@@ -1,4 +1,5 @@
 name: wheel-offline-package-distr
+
 on: [ push ]
 
 permissions:
@@ -47,11 +48,13 @@ jobs:
       - uses: actions/download-artifact@v3
 
       - name: Display structure of downloaded files
-        run: ls -R
+        run: |
+          mv */*.7z .
+          ls -l
 
       - name: Extract all packages
         run: |
-          7z e */*.7z -y -o"./pip_packages"
+          find . -name "\*.7z" -type f -exec 7z e {} -y -o"./pip_packages" \\;
 
       - name: Repack merged wheel packages
         run: |
