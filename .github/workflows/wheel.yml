@@ -54,7 +54,7 @@ jobs:
 
       - name: Extract all packages
         run: |
-          find . -name "\*.7z" -type f -exec 7z e {} -y -o"./pip_packages" \\;
+          find . -name "\*.7z" -type f -exec "7z e {} -y -o'./pip_packages'" \\;
 
       - name: Repack merged wheel packages
         run: |
