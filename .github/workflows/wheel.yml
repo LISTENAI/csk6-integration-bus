@@ -1,0 +1,71 @@
+name: wheel-offline-package-distr
+on: [ push ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-package:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ windows-2022, ubuntu-18.04, ubuntu-20.04, macos-12, macos-11 ]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.9"
+
+      - name: Update pip
+        run: |
+          python -m pip install --upgrade pip
+
+      - name: Collect wheel packages
+        run: |
+          python -m pip download -r $PWD/pip_requirements/requirements.txt -d ./pip_packages
+
+      - name: Pack wheel packages
+        uses: edgarrc/action-7z@v1
+        with:
+          args: 7z a -t7z -mx=5 packages_${{ matrix.os }}.7z ./pip_packages/*
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: packages_${{ matrix.os }}
+          path: packages_${{ matrix.os }}.7z
+
+    merge-packages:
+      needs: build-package
+
+      runs-on: ubuntu-22.04
+
+      strategy:
+        matrix:
+          os: [ windows-2022, ubuntu-18.04, ubuntu-20.04, macos-12, macos-11 ]
+
+      steps:
+        - uses: actions/download-artifact@v3
+
+        - name: Display structure of downloaded files
+          run: ls -R
+
+        - name: Extract all packages
+          uses: edgarrc/action-7z@v1
+          with:
+            args: 7z x packages_${{ matrix.os }}.7z -y -o"./pip_packages"
+
+        - name: Repack merged wheel packages
+          uses: edgarrc/action-7z@v1
+          with:
+            args: 7z a -t7z -mx=5 pip_packages.7z ./pip_packages
+
+        - name: Upload artifacts
+          uses: actions/upload-artifact@v2
+          with:
+            name: pip_packages
+            path: pip_packages.7z
