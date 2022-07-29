@@ -31,13 +31,13 @@ jobs:
 
       - name: Pack wheel packages
         run: |
-          7z a intermediate_packages_${{ matrix.os }}.7z ./pip_packages/* -mx1
+          7z a intermediate_package_${{ matrix.os }}.7z ./pip_packages/* -mx1
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: intermediate_packages_${{ matrix.os }}
-          path: intermediate_packages_${{ matrix.os }}.7z
+          name: intermediate_package_${{ matrix.os }}
+          path: intermediate_package_${{ matrix.os }}.7z
 
   merge-packages:
     needs: build-package
@@ -67,7 +67,11 @@ jobs:
           path: pip_packages.7z
 
       - name: Remove intermediate artifacts
-        uses: kolpav/purge-artifacts-action@v1
+        uses: geekyeggo/delete-artifact@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          onlyPrefix: intermediate_
+          name: |
+            intermediate_package_windows-2022
+            intermediate_package_ubuntu-18.04
+            intermediate_package_ubuntu-20.04
+            intermediate_package_macos-12
+            intermediate_package_macos-11
