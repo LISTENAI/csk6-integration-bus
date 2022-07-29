@@ -1,6 +1,10 @@
 name: publish-standalone
 
-on: [ push ]
+on: 
+  push:
+    branches:
+      - master
+      - develop
 
 env:
   node_ver: v16.14.0

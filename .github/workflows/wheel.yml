@@ -1,6 +1,10 @@
 name: wheel-offline-package-distr
 
-on: [ push ]
+on: 
+  push:
+    branches:
+      - master
+      - develop
 
 permissions:
   contents: read
