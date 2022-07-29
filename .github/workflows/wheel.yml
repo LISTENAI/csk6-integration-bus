@@ -56,11 +56,10 @@ jobs:
       - name: Extract all packages
         run: |
           find . -name "*.7z" -type f -exec 7z e {} -y -o"./dependencies" \;
-          mv ./dependencies/local_requirements.txt ..
 
       - name: Repack merged wheel packages
         run: |
-          7z a lisa-zephyr-whl-latest.7z ./dependencies ./local_requirements.txt -mx3
+          7z a lisa-zephyr-whl-latest.7z ./dependencies -mx3
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
