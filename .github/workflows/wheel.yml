@@ -27,11 +27,14 @@ jobs:
 
       - name: Collect wheel packages
         run: |
-          python -m pip download -r $PWD/pip_requirements/requirements.txt -d ./pip_packages
+          mkdir -p ./pip_packages
+          find $PWD/pip_requirements/ -name "*.txt" -exec grep "^[^#-|^$]" {} \; >./pip_packages/local_requirements.txt
+          sed -i "s/https:\/\/\(.*\)\//.\/dependencies\//g" ./pip_packages/local_requirements.txt
+          python -m pip download -r ./pip_packages/local_requirements.txt -d ./pip_packages
 
       - name: Pack wheel packages
         run: |
-          7z a intermediate_package_${{ matrix.os }}.7z ./pip_packages/* -mx1
+          7z a intermediate_package_${{ matrix.os }}.7z ./pip_packages/* -mx0
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
@@ -54,17 +57,18 @@ jobs:
 
       - name: Extract all packages
         run: |
-          find . -name "*.7z" -type f -exec 7z e {} -y -o"./pip_packages" \;
+          find . -name "*.7z" -type f -exec 7z e {} -y -o"./dependencies" \;
+          mv ./dependencies/local_requirements.txt ..
 
       - name: Repack merged wheel packages
         run: |
-          7z a pip_packages.7z ./pip_packages -mx5
+          7z a lisa-zephyr-whl-latest.7z ./dependencies ./local_requirements.txt -mx3
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: pip_packages
-          path: pip_packages.7z
+          path: lisa-zephyr-whl-latest.7z
 
       - name: Remove intermediate artifacts
         uses: geekyeggo/delete-artifact@v1
