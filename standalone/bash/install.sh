@@ -41,11 +41,11 @@ lisa_tar() {
   fi
 }
 
-lisa_unzstd() {
-  if lisa_has "unzstd" && lisa_has "tar"; then
-    command pv "$1" |tar -I zstd -xf -  -C "$2"
+lisa_un7z() {
+  if lisa_has "7z"; then
+    command 7z x "$1" -o"$2"
   else
-    lisa_echo >&2 'You need tar and zstd to install Lisa'
+    lisa_echo >&2 'You need 7z to install Lisa'
     exit 1
   fi
 }
@@ -83,7 +83,7 @@ lisa_get_format() {
 
 lisa_inst_requirements() {
   if lisa_has "apt"; then
-    sudo apt install -y gpg zstd pv xz-utils git
+    sudo apt install -y gpg p7zip-full pv xz-utils git
     if [ $? -ne 0 ]; then
       lisa_echo "Oops...something went wrong when installing required application(s)"
       exit 1
@@ -94,7 +94,7 @@ lisa_inst_requirements() {
       lisa_echo "Oops...something went wrong when enabling EPEL repository"
       exit 1
     fi
-    sudo yum install -y gpg zstd pv xz git
+    sudo yum install -y gpg p7zip-full pv xz git
     if [ $? -ne 0 ]; then
       lisa_echo "Oops...something went wrong when installing required application(s)"
       exit 1
@@ -138,16 +138,16 @@ lisa_do_install() {
   LISA_RC="${HOME}/ifly/lisa/standalone/bash/.lisarc"
 
   local LISA_SDK_SOURCE
-  LISA_SDK_SOURCE="https://cdn.iflyos.cn/public/lisa-zephyr-dist/lisa-zephyr-sdk-latest.tar.zst"
+  LISA_SDK_SOURCE="https://cdn.iflyos.cn/public/lisa-zephyr-dist/lisa-zephyr-sdk-latest.7z"
 
   local LISA_SDK_SIG
-  LISA_SDK_SIG="https://cdn.iflyos.cn/public/lisa-zephyr-dist/lisa-zephyr-sdk-latest.tar.zst.sig"
+  LISA_SDK_SIG="https://cdn.iflyos.cn/public/lisa-zephyr-dist/lisa-zephyr-sdk-latest.7z.sig"
 
   local LISA_WHL_SOURCE
-  LISA_WHL_SOURCE="https://cdn.iflyos.cn/public/lisa-zephyr-dist/lisa-zephyr-whl-latest.tar.zst"
+  LISA_WHL_SOURCE="https://cdn.iflyos.cn/public/lisa-zephyr-dist/lisa-zephyr-whl-latest.7z"
 
   local LISA_WHL_SIG
-  LISA_WHL_SIG="https://cdn.iflyos.cn/public/lisa-zephyr-dist/lisa-zephyr-whl-latest.tar.zst.sig"
+  LISA_WHL_SIG="https://cdn.iflyos.cn/public/lisa-zephyr-dist/lisa-zephyr-whl-latest.7z.sig"
 
   if ! [ -d "${INSTALL_DIR}" ]; then
     command mkdir -p $INSTALL_DIR
@@ -163,17 +163,17 @@ lisa_do_install() {
   lisa_echo "=> Downloading LISA"
   lisa_download --progress-bar "$LISA_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}"
   lisa_echo "=> Downloading SDK package"
-  lisa_download --progress-bar "$LISA_SDK_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst"
+  lisa_download --progress-bar "$LISA_SDK_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z"
   lisa_echo "=> Downloading required python wheel package"
-  lisa_download --progress-bar "$LISA_WHL_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-whl-latest.tar.zst"
+  lisa_download --progress-bar "$LISA_WHL_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-whl-latest.7z"
 
   if [ $GPGCHECK -eq 0 ]; then
     lisa_echo "=> Checking integrity of resource package"
-    lisa_download -s "$LISA_SDK_SIG" -o "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst.sig"
-    lisa_download -s "$LISA_WHL_SIG" -o "$INSTALL_DIR/lisa-zephyr-whl-latest.tar.zst.sig"
-    lisa_verify_signature "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst.sig" "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst"
+    lisa_download -s "$LISA_SDK_SIG" -o "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z.sig"
+    lisa_download -s "$LISA_WHL_SIG" -o "$INSTALL_DIR/lisa-zephyr-whl-latest.7z.sig"
+    lisa_verify_signature "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z.sig" "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z"
     local SDK_SIG_OK=$?
-    lisa_verify_signature "$INSTALL_DIR/lisa-zephyr-whl-latest.tar.zst.sig" "$INSTALL_DIR/lisa-zephyr-whl-latest.tar.zst"
+    lisa_verify_signature "$INSTALL_DIR/lisa-zephyr-whl-latest.7z.sig" "$INSTALL_DIR/lisa-zephyr-whl-latest.7z"
     local WHL_SIG_OK=$?
     if [ $SDK_SIG_OK -ne 0 ] || [ $WHL_SIG_OK -ne 0 ]; then
       lisa_echo "Resource packages integrity check failed!"
@@ -187,10 +187,11 @@ lisa_do_install() {
   mv "$INSTALL_DIR/packages" "$INSTALL_DIR/../lisa-zephyr"
   lisa_echo "=> Extracting SDK package"
   mkdir -p "$INSTALL_DIR/../csk-sdk"
-  lisa_unzstd "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst" "$INSTALL_DIR/../csk-sdk"
+  lisa_un7z "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z" "$INSTALL_DIR/../csk-sdk"
   lisa_echo "=> Extracting WHL package"
   mkdir -p "$INSTALL_DIR/../lisa-zephyr/whl"
-  lisa_unzstd "$INSTALL_DIR/lisa-zephyr-whl-latest.tar.zst" "$INSTALL_DIR/../lisa-zephyr/whl"
+  lisa_un7z "$INSTALL_DIR/lisa-zephyr-whl-latest.7z" "$INSTALL_DIR/../lisa-zephyr/whl"
+  mv "$INSTALL_DIR/../lisa-zephyr/whl/dependencies/local_requirements.txt" "$INSTALL_DIR/../lisa-zephyr/whl/local_requirements.txt"
 
   lisa_echo "=> Preparing workspace specially for you"
   lisa_shell_command_link
@@ -207,10 +208,10 @@ lisa_do_install() {
 
   lisa_echo "=> Some housekeeping"
   rm -f "$INSTALL_DIR/lisa-zephyr-linux_x64.tar.xz"
-  rm -f "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst"
-  rm -f "$INSTALL_DIR/lisa-zephyr-whl-latest.tar.zst"
-  rm -f "$INSTALL_DIR/lisa-zephyr-sdk-latest.tar.zst.sig"
-  rm -f "$INSTALL_DIR/lisa-zephyr-whl-latest.tar.zst.sig"
+  rm -f "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z"
+  rm -f "$INSTALL_DIR/lisa-zephyr-whl-latest.7z"
+  rm -f "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z.sig"
+  rm -f "$INSTALL_DIR/lisa-zephyr-whl-latest.7z.sig"
   
   lisa_echo "=> Success! try run command 'lisa info zephyr'"
 }
