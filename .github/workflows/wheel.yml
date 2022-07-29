@@ -27,10 +27,8 @@ jobs:
 
       - name: Collect wheel packages
         run: |
-          mkdir -p ./pip_packages
-          find $PWD/pip_requirements/ -name "*.txt" -exec grep "^[^#-|^$]" {} \; >./pip_packages/local_requirements.txt
-          sed -i "s/https:\/\/\(.*\)\//.\/dependencies\//g" ./pip_packages/local_requirements.txt
           python -m pip download -r ./pip_packages/local_requirements.txt -d ./pip_packages
+          cp -f local_requirements.txt ./pip_packages
 
       - name: Pack wheel packages
         run: |
