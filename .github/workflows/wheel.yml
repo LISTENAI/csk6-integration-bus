@@ -28,7 +28,7 @@ jobs:
       - name: Collect wheel packages
         run: |
           python -m pip download -r ./local_requirements.txt -d ./pip_packages
-          cp -f local_requirements.txt ./pip_packages
+          cp local_requirements.txt ./pip_packages
 
       - name: Pack wheel packages
         run: |
