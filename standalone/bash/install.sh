@@ -115,7 +115,26 @@ lisa_verify_signature() {
   return $?
 }
 
+lisa_root_check() {
+  if [ $(id -u) -eq 0 ]; then
+    lisa_echo "Please run installer with non-root user"
+    exit 1
+  fi
+}
+
+lisa_channel_selection() {
+  DOWNLOAD_CHANNEL="stable"
+  if [ $# -eq 1 ]; then
+    case "$1" in
+      beta | stable) DOWNLOAD_CHANNEL=$1 ;;
+      *) DOWNLOAD_CHANNEL="stable" ;;
+    esac
+  fi
+}
+
 lisa_do_install() {
+  lisa_echo "Using channel ${DOWNLOAD_CHANNEL}"
+
   local INSTALL_DIR
   INSTALL_DIR="$(lisa_default_install_dir)"
 
@@ -161,11 +180,14 @@ lisa_do_install() {
 
   echo $LISA_SOURCE
   lisa_echo "=> Downloading LISA"
-  lisa_download --progress-bar "$LISA_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}"
+  #lisa_download --progress-bar "$LISA_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}"
+  cp -f /home/listenai/Downloads/lisa-zephyr-linux_x64-beta.tar.xz "$INSTALL_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}"
   lisa_echo "=> Downloading SDK package"
-  lisa_download --progress-bar "$LISA_SDK_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z"
+  #lisa_download --progress-bar "$LISA_SDK_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z"
+  cp -f /home/listenai/Downloads/lisa-zephyr-sdk-latest.7z "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z"
   lisa_echo "=> Downloading required python wheel package"
-  lisa_download --progress-bar "$LISA_WHL_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-whl-latest.7z"
+  #lisa_download --progress-bar "$LISA_WHL_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-whl-latest.7z"
+  cp -f /home/listenai/Downloads/lisa-zephyr-whl-latest.7z "$INSTALL_DIR/lisa-zephyr-whl-latest.7z"
 
   if [ $GPGCHECK -eq 0 ]; then
     lisa_echo "=> Checking integrity of resource package"
@@ -197,9 +219,9 @@ lisa_do_install() {
   lisa_shell_command_link
   export LISA_HOME=$INSTALL_DIR/../
   export LISA_PREFIX=$INSTALL_DIR
-  $INSTALL_DIR/libexec/lisa zep install
+  $LISA_HOME/lisa/libexec/lisa zep install
   echo "{\"env\":\"csk6\"}" |tee $LISA_HOME/lisa-zephyr/config.json >/dev/null 2>&1
-  $INSTALL_DIR/libexec/lisa zep use-sdk "$INSTALL_DIR/../csk-sdk"
+  $LISA_HOME/lisa/libexec/lisa zep use-sdk "$LISA_HOME/csk-sdk"
   sudo sed -i '/^LISA_HOME=/d' /etc/environment
   sudo sed -i '/^LISA_PREFIX=/d' /etc/environment
   echo "LISA_HOME=\"${LISA_HOME}\"" |sudo tee -a /etc/environment >/dev/null 2>&1
@@ -216,12 +238,6 @@ lisa_do_install() {
   lisa_echo "=> Success! try run command 'lisa info zephyr'"
 }
 
-DOWNLOAD_CHANNEL="stable"
-if [ $# -eq 1 ]; then
-  case "$1" in
-    beta | stable) DOWNLOAD_CHANNEL=$1 ;;
-    *) DOWNLOAD_CHANNEL="stable" ;;
-  esac
-fi
-
+lisa_root_check
+lisa_channel_selection $1
 lisa_do_install

@@ -71,3 +71,7 @@ tabulate
 cbor>=1.0.0
 
 psutil
+
+setuptools
+
+pip
