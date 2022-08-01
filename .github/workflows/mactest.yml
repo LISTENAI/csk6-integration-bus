@@ -14,4 +14,5 @@ jobs:
 
       - name: Run install script
         run: |
+          chmod 755 ./standalone/bash/install.sh
           ./standalone/bash/install.sh beta
