@@ -193,7 +193,7 @@ lisa_do_install() {
     command mkdir -p $INSTALL_DIR
   fi
 
-  lisa_echo "=> Installing zstd & gpg"
+  lisa_echo "=> Installing 7z & gpg"
   lisa_inst_requirements
 
   lisa_is_gpgkey_imported
