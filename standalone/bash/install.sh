@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 lisa_has() {
-  type "$1" > /dev/null 2>&1
+  which "$1" > /dev/null 2>&1
 }
 
 lisa_default_install_dir() {
@@ -82,27 +82,48 @@ lisa_get_format() {
 }
 
 lisa_inst_requirements() {
-  if lisa_has "apt"; then
-    sudo apt install -y gpg p7zip-full pv xz-utils git
-    if [ $? -ne 0 ]; then
-      lisa_echo "Oops...something went wrong when installing required application(s)"
+  local LISA_OS
+  LISA_OS="$(lisa_get_os)"
+  case "${LISA_OS}" in
+    linux)
+      if lisa_has "apt"; then
+        sudo apt install -y gpg p7zip-full pv xz-utils git
+        if [ $? -ne 0 ]; then
+          lisa_echo "Oops...something went wrong when installing required application(s)"
+          exit 1
+        fi
+      elif lisa_has "yum"; then
+        sudo yum install -y epel-release
+        if [ $? -ne 0 ]; then
+          lisa_echo "Oops...something went wrong when enabling EPEL repository"
+          exit 1
+        fi
+        sudo yum install -y gpg p7zip-full pv xz git
+        if [ $? -ne 0 ]; then
+          lisa_echo "Oops...something went wrong when installing required application(s)"
+          exit 1
+        fi
+      else
+        lisa_echo "No apt/yum found in your system, please install one of them first."
+        exit 1
+      fi
+      ;;
+    darwin)
+      if lisa_has "brew"; then
+        brew install gnupg p7zip pv
+        if [ $? -ne 0 ]; then
+          lisa_echo "Oops...something went wrong when installing required application(s)"
+          exit 1
+        fi
+      else
+        lisa_echo "No brew found in your system, please install one of them first."
+        exit 1
+      fi
+      ;;
+    *)
+      lisa_echo "Not a supported system"
       exit 1
-    fi
-  elif lisa_has "yum"; then
-    sudo yum install -y epel-release
-    if [ $? -ne 0 ]; then
-      lisa_echo "Oops...something went wrong when enabling EPEL repository"
-      exit 1
-    fi
-    sudo yum install -y gpg p7zip-full pv xz git
-    if [ $? -ne 0 ]; then
-      lisa_echo "Oops...something went wrong when installing required application(s)"
-      exit 1
-    fi
-  else
-    lisa_echo "No apt or yum found in your system, please install one of them first."
-    exit 1
-  fi
+  esac
 }
 
 lisa_is_gpgkey_imported() {
@@ -172,11 +193,11 @@ lisa_do_install() {
     command mkdir -p $INSTALL_DIR
   fi
 
+  lisa_echo "=> Installing 7z & gpg"
+  lisa_inst_requirements
+
   lisa_is_gpgkey_imported
   local GPGCHECK=$?
-
-  lisa_echo "=> Installing zstd & gpg"
-  lisa_inst_requirements
 
   echo $LISA_SOURCE
   lisa_echo "=> Downloading LISA"
@@ -219,8 +240,20 @@ lisa_do_install() {
   $LISA_HOME/lisa/libexec/lisa zep install
   echo "{\"env\":\"csk6\"}" |tee $LISA_HOME/lisa-zephyr/config.json >/dev/null 2>&1
   $LISA_HOME/lisa/libexec/lisa zep use-sdk "$LISA_HOME/csk-sdk"
-  sudo sed -i '/^LISA_HOME=/d' /etc/environment
-  sudo sed -i '/^LISA_PREFIX=/d' /etc/environment
+
+  case "${LISA_OS}" in
+    linux)
+      sudo sed -i '/^LISA_HOME=/d' /etc/environment
+      sudo sed -i '/^LISA_PREFIX=/d' /etc/environment
+      ;;
+    darwin)
+      sudo sed -i '' -e '/^LISA_HOME=/d' /etc/environment
+      sudo sed -i '' -e '/^LISA_PREFIX=/d' /etc/environment
+      ;;
+    *)
+      lisa_echo "Unable to add OS environment, you might need to add it by yourself."
+  esac
+
   echo "LISA_HOME=\"${LISA_HOME}\"" |sudo tee -a /etc/environment >/dev/null 2>&1
   echo "LISA_PREFIX=\"${LISA_PREFIX}\"" |sudo tee -a /etc/environment >/dev/null 2>&1
   source /etc/environment
