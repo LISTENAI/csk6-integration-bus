@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 lisa_has() {
-  type "$1" > /dev/null 2>&1
+  which "$1" > /dev/null 2>&1
 }
 
 lisa_default_install_dir() {
