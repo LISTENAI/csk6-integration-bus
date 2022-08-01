@@ -99,8 +99,14 @@ lisa_inst_requirements() {
       lisa_echo "Oops...something went wrong when installing required application(s)"
       exit 1
     fi
+  elif lisa_has "brew"; then
+    brew install gnupg p7zip pv
+    if [ $? -ne 0 ]; then
+      lisa_echo "Oops...something went wrong when installing required application(s)"
+      exit 1
+    fi
   else
-    lisa_echo "No apt or yum found in your system, please install one of them first."
+    lisa_echo "No apt/yum/brew found in your system, please install one of them first."
     exit 1
   fi
 }
