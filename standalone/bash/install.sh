@@ -85,7 +85,7 @@ lisa_inst_requirements() {
   local LISA_OS
   LISA_OS="$(lisa_get_os)"
   case "${LISA_OS}" in
-    Linux\ *)
+    Linux)
       if lisa_has "apt"; then
         sudo apt install -y gpg p7zip-full pv xz-utils git
         if [ $? -ne 0 ]; then
@@ -108,7 +108,7 @@ lisa_inst_requirements() {
         exit 1
       fi
       ;;
-    Darwin\ *)
+    Darwin)
       if lisa_has "brew"; then
         brew install gnupg p7zip pv
         if [ $? -ne 0 ]; then
