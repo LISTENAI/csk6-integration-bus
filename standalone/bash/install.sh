@@ -193,11 +193,11 @@ lisa_do_install() {
     command mkdir -p $INSTALL_DIR
   fi
 
-  lisa_is_gpgkey_imported
-  local GPGCHECK=$?
-
   lisa_echo "=> Installing zstd & gpg"
   lisa_inst_requirements
+
+  lisa_is_gpgkey_imported
+  local GPGCHECK=$?
 
   echo $LISA_SOURCE
   lisa_echo "=> Downloading LISA"
@@ -240,8 +240,20 @@ lisa_do_install() {
   $LISA_HOME/lisa/libexec/lisa zep install
   echo "{\"env\":\"csk6\"}" |tee $LISA_HOME/lisa-zephyr/config.json >/dev/null 2>&1
   $LISA_HOME/lisa/libexec/lisa zep use-sdk "$LISA_HOME/csk-sdk"
-  sudo sed -i '/^LISA_HOME=/d' /etc/environment
-  sudo sed -i '/^LISA_PREFIX=/d' /etc/environment
+
+  case "${LISA_OS}" in
+    linux)
+      sudo sed -i '/^LISA_HOME=/d' /etc/environment
+      sudo sed -i '/^LISA_PREFIX=/d' /etc/environment
+      ;;
+    darwin)
+      sudo sed -i '' -e '/^LISA_HOME=/d' /etc/environment
+      sudo sed -i '' -e '/^LISA_PREFIX=/d' /etc/environment
+      ;;
+    *)
+      lisa_echo "Unable to add OS environment, you might need to add it by yourself."
+  esac
+
   echo "LISA_HOME=\"${LISA_HOME}\"" |sudo tee -a /etc/environment >/dev/null 2>&1
   echo "LISA_PREFIX=\"${LISA_PREFIX}\"" |sudo tee -a /etc/environment >/dev/null 2>&1
   source /etc/environment
