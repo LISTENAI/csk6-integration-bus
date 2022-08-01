@@ -180,14 +180,11 @@ lisa_do_install() {
 
   echo $LISA_SOURCE
   lisa_echo "=> Downloading LISA"
-  #lisa_download --progress-bar "$LISA_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}"
-  cp -f /home/listenai/Downloads/lisa-zephyr-linux_x64-beta.tar.xz "$INSTALL_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}"
+  lisa_download --progress-bar "$LISA_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}"
   lisa_echo "=> Downloading SDK package"
-  #lisa_download --progress-bar "$LISA_SDK_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z"
-  cp -f /home/listenai/Downloads/lisa-zephyr-sdk-latest.7z "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z"
+  lisa_download --progress-bar "$LISA_SDK_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z"
   lisa_echo "=> Downloading required python wheel package"
-  #lisa_download --progress-bar "$LISA_WHL_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-whl-latest.7z"
-  cp -f /home/listenai/Downloads/lisa-zephyr-whl-latest.7z "$INSTALL_DIR/lisa-zephyr-whl-latest.7z"
+  lisa_download --progress-bar "$LISA_WHL_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-whl-latest.7z"
 
   if [ $GPGCHECK -eq 0 ]; then
     lisa_echo "=> Checking integrity of resource package"
