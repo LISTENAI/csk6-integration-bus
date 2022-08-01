@@ -82,33 +82,48 @@ lisa_get_format() {
 }
 
 lisa_inst_requirements() {
-  if lisa_has "apt"; then
-    sudo apt install -y gpg p7zip-full pv xz-utils git
-    if [ $? -ne 0 ]; then
-      lisa_echo "Oops...something went wrong when installing required application(s)"
+  local LISA_OS
+  LISA_OS="$(lisa_get_os)"
+  case "${LISA_OS}" in
+    Linux\ *)
+      if lisa_has "apt"; then
+        sudo apt install -y gpg p7zip-full pv xz-utils git
+        if [ $? -ne 0 ]; then
+          lisa_echo "Oops...something went wrong when installing required application(s)"
+          exit 1
+        fi
+      elif lisa_has "yum"; then
+        sudo yum install -y epel-release
+        if [ $? -ne 0 ]; then
+          lisa_echo "Oops...something went wrong when enabling EPEL repository"
+          exit 1
+        fi
+        sudo yum install -y gpg p7zip-full pv xz git
+        if [ $? -ne 0 ]; then
+          lisa_echo "Oops...something went wrong when installing required application(s)"
+          exit 1
+        fi
+      else
+        lisa_echo "No apt/yum found in your system, please install one of them first."
+        exit 1
+      fi
+      ;;
+    Darwin\ *)
+      if lisa_has "brew"; then
+        brew install gnupg p7zip pv
+        if [ $? -ne 0 ]; then
+          lisa_echo "Oops...something went wrong when installing required application(s)"
+          exit 1
+        fi
+      else
+        lisa_echo "No brew found in your system, please install one of them first."
+        exit 1
+      fi
+      ;;
+    *)
+      lisa_echo "Not a supported system"
       exit 1
-    fi
-  elif lisa_has "yum"; then
-    sudo yum install -y epel-release
-    if [ $? -ne 0 ]; then
-      lisa_echo "Oops...something went wrong when enabling EPEL repository"
-      exit 1
-    fi
-    sudo yum install -y gpg p7zip-full pv xz git
-    if [ $? -ne 0 ]; then
-      lisa_echo "Oops...something went wrong when installing required application(s)"
-      exit 1
-    fi
-  elif lisa_has "brew"; then
-    brew install gnupg p7zip pv
-    if [ $? -ne 0 ]; then
-      lisa_echo "Oops...something went wrong when installing required application(s)"
-      exit 1
-    fi
-  else
-    lisa_echo "No apt/yum/brew found in your system, please install one of them first."
-    exit 1
-  fi
+  esac
 }
 
 lisa_is_gpgkey_imported() {
