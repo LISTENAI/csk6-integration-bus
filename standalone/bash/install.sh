@@ -15,6 +15,11 @@ lisa_echo() {
 lisa_download() {
   if lisa_has "curl"; then
     command curl --fail --compressed -q "$@"
+    local CURL_ERR=$?
+    if [ $CURL_ERR -ne 0 ]; then
+      lisa_echo >&2 "*** Erm.... unable to download the archive, error = ${CURL_ERR}"
+      exit 1
+    fi
   elif lisa_has "wget"; then
     ARGS=$(lisa_echo "$@" | command sed -e 's/--progress-bar /--progress=bar /' \
                             -e 's/--compressed //' \
@@ -26,8 +31,13 @@ lisa_download() {
                             -e 's/-o /-O /' \
                             -e 's/-C - /-c /')
     eval wget $ARGS
+    local WGET_ERR=$?
+    if [ $WGET_ERR -ne 0 ]; then
+      lisa_echo >&2 "*** Erm.... unable to download the archive, error = ${WGET_ERR}"
+      exit 1
+    fi
   else
-    lisa_echo "You need either curl or wget to download packages"
+    lisa_echo >&2 "*** You need either curl or wget to download packages"
     exit 1
   fi
 }
@@ -35,8 +45,12 @@ lisa_download() {
 lisa_tar() {
   if lisa_has "tar"; then
     command pv "$1" |tar xJf - -C "$2"
+    if [ $? -ne 0 ]; then
+      lisa_echo >&2 '*** Erm.... unable to decompress the archive, something went wrong?'
+      exit 1
+    fi
   else
-    lisa_echo >&2 'You need tar to install Lisa'
+    lisa_echo >&2 '*** You need tar to install Lisa'
     exit 1
   fi
 }
@@ -44,8 +58,12 @@ lisa_tar() {
 lisa_un7z() {
   if lisa_has "7z"; then
     command 7z x "$1" -o"$2"
+    if [ $? -ne 0 ]; then
+      lisa_echo >&2 '*** Erm.... unable to decompress the archive, something went wrong?'
+      exit 1
+    fi
   else
-    lisa_echo >&2 'You need 7z to install Lisa'
+    lisa_echo >&2 '*** You need 7z to install Lisa'
     exit 1
   fi
 }
@@ -89,22 +107,22 @@ lisa_inst_requirements() {
       if lisa_has "apt"; then
         sudo apt install -y gpg p7zip-full pv xz-utils git
         if [ $? -ne 0 ]; then
-          lisa_echo "Oops...something went wrong when installing required application(s)"
+          lisa_echo >&2 "*** Oops...something went wrong when installing required application(s)"
           exit 1
         fi
       elif lisa_has "yum"; then
         sudo yum install -y epel-release
         if [ $? -ne 0 ]; then
-          lisa_echo "Oops...something went wrong when enabling EPEL repository"
+          lisa_echo >&2 "*** Oops...something went wrong when enabling EPEL repository"
           exit 1
         fi
         sudo yum install -y gpg p7zip-full pv xz git
         if [ $? -ne 0 ]; then
-          lisa_echo "Oops...something went wrong when installing required application(s)"
+          lisa_echo >&2 "*** Oops...something went wrong when installing required application(s)"
           exit 1
         fi
       else
-        lisa_echo "No apt/yum found in your system, please install one of them first."
+        lisa_echo >&2 "*** No apt/yum found in your system, please install one of them first."
         exit 1
       fi
       ;;
@@ -112,16 +130,16 @@ lisa_inst_requirements() {
       if lisa_has "brew"; then
         brew install gnupg p7zip pv
         if [ $? -ne 0 ]; then
-          lisa_echo "Oops...something went wrong when installing required application(s)"
+          lisa_echo >&2 "*** Oops...something went wrong when installing required application(s)"
           exit 1
         fi
       else
-        lisa_echo "No brew found in your system, please install one of them first."
+        lisa_echo >&2 "*** No brew found in your system, please install one of them first."
         exit 1
       fi
       ;;
     *)
-      lisa_echo "Not a supported system"
+      lisa_echo >&2 "*** Not a supported system"
       exit 1
   esac
 }
@@ -138,7 +156,7 @@ lisa_verify_signature() {
 
 lisa_root_check() {
   if [ $(id -u) -eq 0 ]; then
-    lisa_echo "Please run installer with non-root user"
+    lisa_echo >&2 "*** Please run installer with non-root user"
     exit 1
   fi
 }
@@ -172,7 +190,7 @@ lisa_do_install() {
   esac
 
   local LISA_BIN
-  LISA_BIN="${INSTALL_DIR}/libexec"
+  LISA_BIN="${INSTALL_DIR}/libexec" ``
 
   local LISA_RC
   LISA_RC="${HOME}/ifly/lisa/standalone/bash/.lisarc"
@@ -199,13 +217,15 @@ lisa_do_install() {
   lisa_is_gpgkey_imported
   local GPGCHECK=$?
 
-  echo $LISA_SOURCE
   lisa_echo "=> Downloading LISA"
-  lisa_download --progress-bar "$LISA_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}"
+  #lisa_download --progress-bar "$LISA_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}"
+  cp -f /home/listenai/Downloads/lisa-zephyr-linux_x64-beta.tar.xz "$INSTALL_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}"
   lisa_echo "=> Downloading SDK package"
-  lisa_download --progress-bar "$LISA_SDK_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z"
+  #lisa_download --progress-bar "$LISA_SDK_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z"
+  cp -f /home/listenai/Downloads/lisa-zephyr-sdk-latest.7z "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z"
   lisa_echo "=> Downloading required python wheel package"
-  lisa_download --progress-bar "$LISA_WHL_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-whl-latest.7z"
+  #lisa_download --progress-bar "$LISA_WHL_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-whl-latest.7z"
+  cp -f /home/listenai/Downloads/lisa-zephyr-whl-latest.7z "$INSTALL_DIR/lisa-zephyr-whl-latest.7z"
 
   if [ $GPGCHECK -eq 0 ]; then
     lisa_echo "=> Checking integrity of resource package"
@@ -216,7 +236,7 @@ lisa_do_install() {
     lisa_verify_signature "$INSTALL_DIR/lisa-zephyr-whl-latest.7z.sig" "$INSTALL_DIR/lisa-zephyr-whl-latest.7z"
     local WHL_SIG_OK=$?
     if [ $SDK_SIG_OK -ne 0 ] || [ $WHL_SIG_OK -ne 0 ]; then
-      lisa_echo "Resource packages integrity check failed!"
+      lisa_echo >&2 "*** Resource packages integrity check failed!"
       exit 1
     fi
   fi
@@ -236,10 +256,19 @@ lisa_do_install() {
   lisa_echo "=> Preparing workspace specially for you"
   lisa_shell_command_link
   export LISA_HOME=$INSTALL_DIR/../
+  LISA_HOME=$(realpath $LISA_HOME)
   export LISA_PREFIX=$INSTALL_DIR
   $LISA_HOME/lisa/libexec/lisa zep install
+  if [ $? -ne 0 ]; then
+    lisa_echo >&2 '*** Unable to initialize virtual developing environment'
+    exit 2
+  fi
   echo "{\"env\":\"csk6\"}" |tee $LISA_HOME/lisa-zephyr/config.json >/dev/null 2>&1
   $LISA_HOME/lisa/libexec/lisa zep use-sdk "$LISA_HOME/csk-sdk"
+  if [ $? -ne 0 ]; then
+    lisa_echo >&2 '*** Unable to initialize west workspace'
+    exit 2
+  fi
 
   case "${LISA_OS}" in
     linux)
@@ -254,6 +283,7 @@ lisa_do_install() {
       lisa_echo "Unable to add OS environment, you might need to add it by yourself."
   esac
 
+  sudo touch /etc/environment
   echo "LISA_HOME=\"${LISA_HOME}\"" |sudo tee -a /etc/environment >/dev/null 2>&1
   echo "LISA_PREFIX=\"${LISA_PREFIX}\"" |sudo tee -a /etc/environment >/dev/null 2>&1
   source /etc/environment
