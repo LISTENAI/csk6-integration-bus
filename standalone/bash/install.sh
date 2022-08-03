@@ -253,7 +253,7 @@ lisa_do_install() {
   lisa_echo "=> Preparing workspace specially for you"
   lisa_shell_command_link
   export LISA_HOME=$INSTALL_DIR/../
-  LISA_HOME=$(realpath $LISA_HOME)
+  LISA_HOME=$(readlink -f $LISA_HOME)
   export LISA_PREFIX=$INSTALL_DIR
   $LISA_HOME/lisa/libexec/lisa zep install
   if [ $? -ne 0 ]; then
