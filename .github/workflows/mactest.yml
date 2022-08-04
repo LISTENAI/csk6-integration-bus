@@ -1,7 +1,5 @@
 name: macos-inst-test
 
-on: [ push ]
-
 permissions:
   contents: read
 
