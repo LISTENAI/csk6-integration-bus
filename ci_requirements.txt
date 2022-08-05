@@ -43,3 +43,4 @@ tabulate
 cbor>=1.0.0
 psutil
 enquiries
+setuptools
