@@ -162,11 +162,11 @@ lisa_root_check() {
 }
 
 lisa_channel_selection() {
-  DOWNLOAD_CHANNEL="stable"
+  DOWNLOAD_CHANNEL="beta"
   if [ $# -eq 1 ]; then
     case "$1" in
       beta | stable) DOWNLOAD_CHANNEL=$1 ;;
-      *) DOWNLOAD_CHANNEL="stable" ;;
+      *) DOWNLOAD_CHANNEL="beta" ;;
     esac
   fi
 }
