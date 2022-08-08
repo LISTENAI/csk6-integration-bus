@@ -16,10 +16,10 @@ jobs:
           format: .tar.xz
           node_suffix: linux-x64
           dist_suffix: linux_x64
-        - os: macos-latest
-          format: .tar.gz
-          node_suffix: darwin-x64
-          dist_suffix: darwin_x64
+#        - os: macos-latest
+#          format: .tar.gz
+#          node_suffix: darwin-x64
+#          dist_suffix: darwin_x64
 
     steps:
     - uses: actions/checkout@v2
@@ -124,12 +124,12 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: ubuntu-latest
+        - os: [ self-hosted, Linux, X64, zgsz-01 ]
           format: .tar.xz
           dist_suffix: linux_x64
-        - os: macos-latest
-          format: .tar.gz
-          dist_suffix: darwin_x64
+#        - os: macos-latest
+#          format: .tar.gz
+#          dist_suffix: darwin_x64
 
     steps:
     - name: Remove pre-installed Node
