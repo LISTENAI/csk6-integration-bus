@@ -1,9 +1,5 @@
 name: 'artifacts cleanup'
-on: 
-  push:
-    branches:
-      - master
-      - develop
+on: [ push ]
 # on:
 #   schedule:
 #     - cron: '0 4 * * *' # every night at 4 am UTC
