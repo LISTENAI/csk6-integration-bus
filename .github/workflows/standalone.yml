@@ -61,6 +61,13 @@ jobs:
         name: csk-integration-bus-${{ matrix.dist_suffix }}
         path: csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
 
+    - name: Remove pre-installed Node
+      run: |
+        which node
+        node -v
+        rm -f `which node`
+        node -v || echo Node removed
+
   # bundle-pwsh:
   #   runs-on: ${{ matrix.os }}
 
@@ -124,7 +131,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: [ self-hosted, Linux, X64, zgsz-01 ]
+        - os: ubuntu-latest
           format: .tar.xz
           dist_suffix: linux_x64
         - os: macos-latest
@@ -132,12 +139,12 @@ jobs:
           dist_suffix: darwin_x64
 
     steps:
-    - name: Remove pre-installed Node
-      run: |
-        which node
-        node -v
-        rm -f `which node`
-        node -v || echo Node removed
+#    - name: Remove pre-installed Node
+#      run: |
+#        which node
+#        node -v
+#        rm -f `which node`
+#        node -v || echo Node removed
 
     - name: Download artifact
       uses: actions/download-artifact@v2
