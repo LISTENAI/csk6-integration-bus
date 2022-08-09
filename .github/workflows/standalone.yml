@@ -16,7 +16,7 @@ jobs:
           format: .tar.xz
           node_suffix: linux-x64
           dist_suffix: linux_x64
-          node_domain: https://192.168.30.232:3003
+          node_domain: https://nginx-gateway-1:3003
         - os: macos-latest
           format: .tar.gz
           node_suffix: darwin-x64
