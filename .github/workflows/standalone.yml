@@ -32,6 +32,7 @@ jobs:
 
     - name: Extract Node
       run: |
+        export XZ_OPT="-T0"
         tar xf node-${{ env.node_ver }}-${{ matrix.node_suffix }}${{ matrix.format }}
         mv node-${{ env.node_ver }}-${{ matrix.node_suffix }} node
 
@@ -56,7 +57,7 @@ jobs:
     - name: Make bundle
       run: |
         cp -vR standalone/bash node/libexec
-        export XZ_DEFAULTS="-T4"
+        export XZ_OPT="-T0"
         cd node && tar caf ../csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }} .
 
     - name: Upload artifacts
@@ -151,6 +152,7 @@ jobs:
     - name: Extract LISA
       run: |
         mkdir -p $HOME/.listenai/lisa
+        export XZ_OPT="-T0"
         tar xf csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }} -C $HOME/.listenai/lisa
 
     - name: Test LISA
