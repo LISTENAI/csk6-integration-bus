@@ -12,18 +12,16 @@ jobs:
     strategy:
       matrix:
         include:
-        # - os: [ self-hosted, Linux, X64, zgsz-01 ]
-        - os: ubuntu-latest
+        - os: [ self-hosted, Linux, X64, zgsz-02 ]
           format: .tar.xz
           node_suffix: linux-x64
           dist_suffix: linux_x64
-          # node_domain: https://nginx-gateway-1:3003
-          node_domain: https://nodejs.org/dist
-        - os: macos-latest
+          node_domain: https://192.168.30.232:3003
+        - os: [ self-hosted, macOS, X64, zgsz-02 ]
           format: .tar.gz
           node_suffix: darwin-x64
           dist_suffix: darwin_x64
-          node_domain: https://nodejs.org/dist
+          node_domain: https://192.168.30.232:3003
 
     steps:
     - uses: actions/checkout@v2
@@ -130,10 +128,10 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: ubuntu-latest
+        - os: [ self-hosted, Linux, X64, zgsz-02 ]
           format: .tar.xz
           dist_suffix: linux_x64
-        - os: macos-latest
+        - os: [ self-hosted, macOS, X64, zgsz-02 ]
           format: .tar.gz
           dist_suffix: darwin_x64
 
@@ -163,16 +161,16 @@ jobs:
         echo $PATH
         lisa info zephyr
 
-    - name: Upload to oss
-      id: upload_to_oss
-      uses: tvrcgo/upload-to-oss@master
-      with:
-        key-id: ${{ secrets.OSS_KEY_ID }}
-        key-secret: ${{ secrets.OSS_KEY_SECRET }}
-        region: oss-cn-shanghai
-        bucket: iflyos-external
-        assets: |
-          csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}:/public/cskTools/lisa-zephyr-${{ matrix.dist_suffix }}${{ matrix.format }}
+    # - name: Upload to oss
+    #   id: upload_to_oss
+    #   uses: tvrcgo/upload-to-oss@master
+    #   with:
+    #     key-id: ${{ secrets.OSS_KEY_ID }}
+    #     key-secret: ${{ secrets.OSS_KEY_SECRET }}
+    #     region: oss-cn-shanghai
+    #     bucket: iflyos-external
+    #     assets: |
+    #       csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}:/public/cskTools/lisa-zephyr-${{ matrix.dist_suffix }}${{ matrix.format }}
 
   # test-pwsh:
   #   needs: bundle-pwsh
