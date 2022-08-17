@@ -72,7 +72,8 @@ jobs:
         port: ${{ secrets.LRS_RES_PORT }}
         mode: Upload
         username: ${{ secrets.LRS_RES_USER }}
-        password: ${{ secrets.LRS_RES_TOKEN }}
+        privateKey: ${{ secrets.LRS_RES_PRIVKEY }}
+        privateKeyPassphrase: ${{ secrets.LRS_RES_TOKEN }}
         source: ./csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
         destination: /interchange/csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
 
@@ -166,7 +167,8 @@ jobs:
         port: ${{ secrets.LRS_RES_PORT }}
         mode: Download
         username: ${{ secrets.LRS_RES_USER }}
-        password: ${{ secrets.LRS_RES_TOKEN }}
+        privateKey: ${{ secrets.LRS_RES_PRIVKEY }}
+        privateKeyPassphrase: ${{ secrets.LRS_RES_TOKEN }}
         source: /interchange/csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
         destination: ./csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
 
