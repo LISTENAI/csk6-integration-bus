@@ -138,11 +138,7 @@ jobs:
     steps:
     - name: Remove pre-installed Node
       run: |
-        NODE_PATH=$(which node)
-        if [ $? -eq 0 ]; then
-          rm -f $NODE_PATH
-          node -v || echo Node removed
-        fi
+        which node && rm -f $(which node) && echo Node removed
 
     - name: Download artifact
       uses: actions/download-artifact@v2
