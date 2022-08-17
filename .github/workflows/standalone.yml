@@ -58,15 +58,14 @@ jobs:
         cd node && tar caf ../csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }} .
 
     - name: Upload artifacts (local)
-      uses: simonrenger/ftp-cache@v2
+      uses: LISTENAI/runner-local-cache@v0.1.0
       with:
-        type: sftp
         host: ${{ secrets.LRS_RES_SERVER }}:${{ secrets.LRS_RES_PORT }}
         mode: Upload
-        user: ${{ secrets.LRS_RES_USER }}
+        username: ${{ secrets.LRS_RES_USER }}
         password: ${{ secrets.LRS_RES_TOKEN }}
         source: ./csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
-        destination: /interchange
+        destination: /interchange/csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
 
   # bundle-pwsh:
   #   runs-on: ${{ matrix.os }}
@@ -144,15 +143,14 @@ jobs:
         which node && rm -f $(which node) && echo Node removed
 
     - name: Download artifacts (local)
-      uses: simonrenger/ftp-cache@v2
+      uses: LISTENAI/runner-local-cache@v0.1.0
       with:
-        type: sftp
         host: ${{ secrets.LRS_RES_SERVER }}:${{ secrets.LRS_RES_PORT }}
         mode: Download
-        user: ${{ secrets.LRS_RES_USER }}
+        username: ${{ secrets.LRS_RES_USER }}
         password: ${{ secrets.LRS_RES_TOKEN }}
         source: /interchange/csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
-        destination: $PWD
+        destination: ./csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
 
     - name: Extract LISA
       run: |
