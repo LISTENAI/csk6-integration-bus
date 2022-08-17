@@ -16,12 +16,12 @@ jobs:
           format: .tar.xz
           node_suffix: linux-x64
           dist_suffix: linux_x64
-          node_domain: https://192.168.30.232:3003
+          node_domain: https://${{ secrets.LRS_RES_SERVER }}:3003
         - os: [ self-hosted, macOS, X64, zgsz-02 ]
           format: .tar.gz
           node_suffix: darwin-x64
           dist_suffix: darwin_x64
-          node_domain: https://192.168.30.232:3003
+          node_domain: https://${{ secrets.LRS_RES_SERVER }}:3003
 
     steps:
     - uses: actions/checkout@v2
@@ -59,11 +59,16 @@ jobs:
         export XZ_OPT="-T0"
         cd node && tar caf ../csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }} .
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v2
+    - name: Upload artifacts (local)
+      uses: simonrenger/ftp-cache@v2
       with:
-        name: csk-integration-bus-${{ matrix.dist_suffix }}
-        path: csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
+        type: sftp
+        host: ${{ secrets.LRS_RES_SERVER }}:${{ secrets.LRS_RES_PORT }}
+        mode: Upload
+        user: ${{ secrets.LRS_RES_USER }}
+        password: ${{ secrets.LRS_RES_TOKEN }}
+        source: ./csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
+        destination: /interchange
 
   # bundle-pwsh:
   #   runs-on: ${{ matrix.os }}
@@ -140,10 +145,16 @@ jobs:
       run: |
         which node && rm -f $(which node) && echo Node removed
 
-    - name: Download artifact
-      uses: actions/download-artifact@v2
+    - name: Download artifacts (local)
+      uses: simonrenger/ftp-cache@v2
       with:
-        name: csk-integration-bus-${{ matrix.dist_suffix }}
+        type: sftp
+        host: ${{ secrets.LRS_RES_SERVER }}:${{ secrets.LRS_RES_PORT }}
+        mode: Download
+        user: ${{ secrets.LRS_RES_USER }}
+        password: ${{ secrets.LRS_RES_TOKEN }}
+        source: /interchange/csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
+        destination: $PWD
 
     - name: Extract LISA
       run: |
