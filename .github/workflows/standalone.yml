@@ -16,18 +16,16 @@ jobs:
           format: .tar.xz
           node_suffix: linux-x64
           dist_suffix: linux_x64
-          node_domain: https://${{ secrets.LRS_RES_SERVER }}:3003
         - os: [ self-hosted, macOS, X64, zgsz-02 ]
           format: .tar.gz
           node_suffix: darwin-x64
           dist_suffix: darwin_x64
-          node_domain: https://${{ secrets.LRS_RES_SERVER }}:3003
 
     steps:
     - uses: actions/checkout@v2
 
     - name: Download Node distribution
-      run: wget --no-check-certificate ${{ matrix.node_domain }}/${{ env.node_ver }}/node-${{ env.node_ver }}-${{ matrix.node_suffix }}${{ matrix.format }}
+      run: wget --no-check-certificate https://${{ secrets.LRS_RES_SERVER }}:3003/${{ env.node_ver }}/node-${{ env.node_ver }}-${{ matrix.node_suffix }}${{ matrix.format }}
 
     - name: Extract Node
       run: |
