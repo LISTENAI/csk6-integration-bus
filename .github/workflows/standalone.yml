@@ -61,7 +61,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: LISTENAI/runner-local-cache
-        ref: v1.0.2
+        ref: v1.0.3
         path: './runner-local-cache'
         token: ${{ secrets.ACTION_CHECKOUT_TOKEN }}
 
@@ -156,7 +156,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: LISTENAI/runner-local-cache
-        ref: v1.0.2
+        ref: v1.0.3
         path: './runner-local-cache'
         token: ${{ secrets.ACTION_CHECKOUT_TOKEN }}
 
