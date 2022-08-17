@@ -61,7 +61,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: LISTENAI/runner-local-cache
-        ref: v1.0.3
+        ref: v1.0.4
         path: './runner-local-cache'
         token: ${{ secrets.ACTION_CHECKOUT_TOKEN }}
 
@@ -72,8 +72,7 @@ jobs:
         port: ${{ secrets.LRS_RES_PORT }}
         mode: Upload
         username: ${{ secrets.LRS_RES_USER }}
-        privateKey: ${{ secrets.LRS_RES_PRIVKEY }}
-        privateKeyPassphrase: ${{ secrets.LRS_RES_TOKEN }}
+        password: ${{ secrets.LRS_RES_TOKEN }}
         source: ./csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
         destination: /interchange/csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
 
@@ -156,7 +155,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: LISTENAI/runner-local-cache
-        ref: v1.0.3
+        ref: v1.0.4
         path: './runner-local-cache'
         token: ${{ secrets.ACTION_CHECKOUT_TOKEN }}
 
@@ -167,8 +166,7 @@ jobs:
         port: ${{ secrets.LRS_RES_PORT }}
         mode: Download
         username: ${{ secrets.LRS_RES_USER }}
-        privateKey: ${{ secrets.LRS_RES_PRIVKEY }}
-        privateKeyPassphrase: ${{ secrets.LRS_RES_TOKEN }}
+        password: ${{ secrets.LRS_RES_TOKEN }}
         source: /interchange/csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
         destination: ./csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
 
