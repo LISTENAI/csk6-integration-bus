@@ -149,7 +149,7 @@ jobs:
     steps:
     - name: Remove pre-installed Node
       run: |
-        which node && rm -f $(which node) && echo Node removed
+        (which node && rm -f $(which node) && echo Node removed) || echo Already removed
 
     - name: Check-out listenai-local-cache library
       uses: actions/checkout@v3
