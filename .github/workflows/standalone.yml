@@ -63,6 +63,7 @@ jobs:
         repository: LISTENAI/runner-local-cache
         ref: v0.1.0
         path: './runner-local-cache'
+        token: ${{ secrets.ACTION_CHECKOUT_TOKEN }}
 
     - name: Upload artifacts (local)
       uses: ./runner-local-cache
@@ -155,6 +156,7 @@ jobs:
         repository: LISTENAI/runner-local-cache
         ref: v0.1.0
         path: './runner-local-cache'
+        token: ${{ secrets.ACTION_CHECKOUT_TOKEN }}
 
     - name: Download artifacts (local)
       uses: ./runner-local-cache
