@@ -57,8 +57,15 @@ jobs:
         export XZ_OPT="-T0"
         cd node && tar caf ../csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }} .
 
+    - name: Check-out listenai-local-cache library
+      uses: actions/checkout@v3
+      with:
+        repository: LISTENAI/runner-local-cache
+        ref: v0.1.0
+        path: './runner-local-cache'
+
     - name: Upload artifacts (local)
-      uses: LISTENAI/runner-local-cache@v0.1.0
+      uses: ./runner-local-cache
       with:
         host: ${{ secrets.LRS_RES_SERVER }}:${{ secrets.LRS_RES_PORT }}
         mode: Upload
@@ -142,8 +149,15 @@ jobs:
       run: |
         which node && rm -f $(which node) && echo Node removed
 
+    - name: Check-out listenai-local-cache library
+      uses: actions/checkout@v3
+      with:
+        repository: LISTENAI/runner-local-cache
+        ref: v0.1.0
+        path: './runner-local-cache'
+
     - name: Download artifacts (local)
-      uses: LISTENAI/runner-local-cache@v0.1.0
+      uses: ./runner-local-cache
       with:
         host: ${{ secrets.LRS_RES_SERVER }}:${{ secrets.LRS_RES_PORT }}
         mode: Download
