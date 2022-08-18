@@ -1,0 +1,82 @@
+name: wheel-offline-package-distr
+
+on: 
+  push:
+    branches:
+      - master
+      - develop
+
+permissions:
+  contents: read
+
+jobs:
+  build-package:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ windows-2022, ubuntu-18.04, ubuntu-20.04, macos-12, macos-11 ]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.9"
+
+      - name: Update pip
+        run: |
+          python -m pip install --upgrade pip
+
+      - name: Collect wheel packages
+        run: |
+          python -m pip download -r ./ci_requirements.txt -d ./pip_packages
+          cp local_requirements.txt ./pip_packages
+
+      - name: Pack wheel packages
+        run: |
+          7z a intermediate_package_${{ matrix.os }}.7z ./pip_packages/* -mx0
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: intermediate_package_${{ matrix.os }}
+          path: intermediate_package_${{ matrix.os }}.7z
+
+  merge-packages:
+    needs: build-package
+
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/download-artifact@v3
+
+      - name: Display structure of downloaded files
+        run: |
+          mv */*.7z .
+          ls -l
+
+      - name: Extract all packages
+        run: |
+          find . -name "*.7z" -type f -exec 7z e {} -y -o"./dependencies" \;
+
+      - name: Repack merged wheel packages
+        run: |
+          7z a lisa-zephyr-whl-latest.7z ./dependencies -mx3
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: pip_packages
+          path: lisa-zephyr-whl-latest.7z
+
+      - name: Remove intermediate artifacts
+        uses: geekyeggo/delete-artifact@v1
+        with:
+          name: |
+            intermediate_package_windows-2022
+            intermediate_package_ubuntu-18.04
+            intermediate_package_ubuntu-20.04
+            intermediate_package_macos-12
+            intermediate_package_macos-11
