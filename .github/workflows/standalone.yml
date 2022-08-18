@@ -352,7 +352,9 @@ jobs:
           wget -O ./snap/container/packages/lisa-zephyr-sdk-latest.7z https://cdn.iflyos.cn/public/lisa-zephyr-dist/lisa-zephyr-sdk-latest.7z
 
       - name: Install snapcraft
-        uses: samuelmeuli/action-snapcraft@v1
+        run: |
+          apt install -y snap
+          snap install snapcraft --classic
       
       - name: Build snap package
         working-directory: ./snap
