@@ -315,3 +315,48 @@ jobs:
             intermediate_package_ubuntu-20.04
             intermediate_package_macos-12
             intermediate_package_macos-11
+  build-snap:
+    runs-on: [ self-hosted, Linux, X64, zgsz-02 ]
+    needs: [ test-bash, merge-whl-packages ]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Check-out listenai-local-cache library
+        uses: actions/checkout@v3
+        with:
+          repository: LISTENAI/runner-local-cache
+          ref: v1.0.4
+          path: './runner-local-cache'
+          token: ${{ secrets.ACTION_CHECKOUT_TOKEN }}
+
+      - 
+
+      - name: Fetch resource package (main)
+        uses: ./runner-local-cache
+        with:
+          host: ${{ secrets.LRS_RES_SERVER }}
+          port: ${{ secrets.LRS_RES_PORT }}
+          mode: Download
+          username: ${{ secrets.LRS_RES_USER }}
+          password: ${{ secrets.LRS_RES_TOKEN }}
+          source: /interchange/csk-integration-bus-linux_x64.tar.xz
+          destination: ./csk-integration-bus-linux_x64.tar.xz
+
+      - name: Fetch resource package (whl)
+        uses: actions/download-artifact@v3
+        with:
+          name: pip_packages
+          path: ./snap/container/packages/lisa-zephyr-whl-latest.7z
+
+      - name: Fetch resource packages (sdk)
+        run: |
+          wget -O ./snap/container/packages/lisa-zephyr-whl-latest.7z https://cdn.iflyos.cn/public/lisa-zephyr-dist/lisa-zephyr-whl-latest.7z
+
+      - name: Install snapcraft
+        uses: samuelmeuli/action-snapcraft@v1
+      
+      - name: Build snap package
+        working-directory: ./snap
+        run: |
+          snapcraft
