@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+if [ -f "$SNAP_USER_DATA/.listenai/lisa/bin/lisa" ]; then
+    $SNAP_USER_DATA/.listenai/lisa/bin/lisa $@
+else
+    echo "Please run lisa.init to initialize first."
+fi

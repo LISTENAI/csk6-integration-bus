@@ -1,0 +1,59 @@
+name: lisa
+base: core20
+version: '2.4.5'
+summary: Listenai Independent Software Architecture (LISA)
+description: |
+  LISA, or Listenai Independent Software Architecture, is a software framework enabling clients to manage and use packages provided by ListenAI.
+
+grade: stable
+confinement: classic
+
+apps:
+  lisa:
+    environment:
+      PATH: $PATH:$SNAP_USER_DATA/.listenai/lisa/bin
+      HOME: $SNAP_USER_DATA
+      LISA_HOME: $SNAP_USER_DATA/.listenai
+      LISA_PREFIX: $SNAP_USER_DATA/.listenai/lisa
+    command: lisa
+  init:
+    command: lisa-init
+
+parts:
+  lisa:
+    override-pull: |
+      rm -rf *
+      snapcraftctl pull
+      mv -f ./configs/sources.list /etc/apt/sources.list
+      chmod 755 ./lisa-init
+      chmod 755 ./lisa
+      chmod 644 ./configs/*
+      chown -R root:root .
+#      wget -O ./packages/lisa-zephyr-linux_x64.tar.xz xxxxxxxx
+#      wget -O ./packages/lisa-zephyr-sdk-latest.7z xxxxxxx
+#      wget -O ./packages/lisa-zephyr-whl-latest.7z xxxxxxx
+      apt update
+      apt install musl
+    override-build: |
+      mkdir $SNAPCRAFT_PART_INSTALL/packages
+      mkdir $SNAPCRAFT_PART_INSTALL/configs
+      mv -f ./lisa-init $SNAPCRAFT_PART_INSTALL
+      mv -f ./lisa $SNAPCRAFT_PART_INSTALL
+      mv -f ./packages/* $SNAPCRAFT_PART_INSTALL/packages
+      mv -f ./configs/pip.conf $SNAPCRAFT_PART_INSTALL/configs
+    plugin: nil
+    source-type: local
+    source: ./container
+    build-packages:
+      - wget
+    stage-packages:
+      - git
+      - libfreetype6
+      - libpng16-16
+      - libusb-1.0-0
+      - musl
+      - libfontconfig
+      - libxcb-util1
+      - wget
+      - xz-utils
+      - p7zip-full 

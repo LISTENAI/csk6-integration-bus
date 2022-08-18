@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+#extract files
+echo "=> Extracting files"
+export PATH=$PATH:$SNAP_USER_DATA/.listenai/lisa/bin:$SNAP_USER_DATA/.listenai/lisa-zephyr/venv/bin
+export HOME=$SNAP_USER_DATA
+export LISA_HOME=$HOME/.listenai
+rm -rf $LISA_HOME
+mkdir -p $LISA_HOME/lisa
+tar xf $SNAP/packages/lisa-zephyr-linux_x64.tar.xz -C "$LISA_HOME/lisa"
+mkdir -p $LISA_HOME/csk-sdk
+7z x $SNAP/packages/lisa-zephyr-sdk-latest.7z -o"$LISA_HOME/csk-sdk"
+7z x $SNAP/packages/lisa-zephyr-whl-latest.7z -o"$LISA_HOME/lisa-zephyr/whl"
+
+#prepare environment
+echo "=> Preparing workspace specially for you"
+mkdir -p "$LISA_HOME/lisa-zephyr"
+mv "$LISA_HOME/lisa/packages" "$LISA_HOME/lisa-zephyr"
+mv "$LISA_HOME/lisa-zephyr/whl/dependencies/local_requirements.txt" "$LISA_HOME/lisa-zephyr/whl/local_requirements.txt"
+echo "{\"env\":[\"csk6\"]}" |tee "$LISA_HOME/lisa-zephyr/config.json" >/dev/null 2>&1
+$LISA_HOME/lisa/libexec/lisa zep install
+$LISA_HOME/lisa/libexec/lisa zep use-sdk "$LISA_HOME/csk-sdk"
+
+echo "=> Completed!"
