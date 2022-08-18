@@ -1,6 +1,10 @@
 name: publish-snap
 
-on: [ push ]
+on:
+  workflow_run:
+    workflows: [ 'publish-standalone', 'wheel-offline-package-distr' ]
+    types:
+      - completed
 
 jobs:
   build-snap:
@@ -16,6 +20,8 @@ jobs:
           ref: v1.0.4
           path: './runner-local-cache'
           token: ${{ secrets.ACTION_CHECKOUT_TOKEN }}
+
+      - 
 
       - name: Fetch resource package (main)
         uses: ./runner-local-cache
