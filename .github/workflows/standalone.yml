@@ -349,7 +349,7 @@ jobs:
 
       - name: Fetch resource packages (sdk)
         run: |
-          wget -O ./snap/container/packages/lisa-zephyr-whl-latest.7z https://cdn.iflyos.cn/public/lisa-zephyr-dist/lisa-zephyr-whl-latest.7z
+          wget -O ./snap/container/packages/lisa-zephyr-sdk-latest.7z https://cdn.iflyos.cn/public/lisa-zephyr-dist/lisa-zephyr-sdk-latest.7z
 
       - name: Install snapcraft
         uses: samuelmeuli/action-snapcraft@v1
