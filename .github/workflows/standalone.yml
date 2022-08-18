@@ -330,8 +330,6 @@ jobs:
           path: './runner-local-cache'
           token: ${{ secrets.ACTION_CHECKOUT_TOKEN }}
 
-      - 
-
       - name: Fetch resource package (main)
         uses: ./runner-local-cache
         with:
