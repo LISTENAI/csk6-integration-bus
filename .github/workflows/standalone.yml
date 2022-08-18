@@ -280,7 +280,7 @@ jobs:
           path: intermediate_package_${{ matrix.os }}.7z
 
   merge-whl-packages:
-    needs: build-package
+    needs: build-whl-package
 
     runs-on: ubuntu-22.04
 
