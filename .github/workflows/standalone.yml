@@ -350,7 +350,7 @@ jobs:
 
       - name: Fetch resource packages (sdk)
         run: |
-          wget -O ./snap/container/packages/lisa-zephyr-sdk-latest.7z https://${{ secrets.LRS_RES_SERVER }}:3003/
+          wget --no-check-certificate -O ./snap/container/packages/lisa-zephyr-sdk-latest.7z https://${{ secrets.LRS_RES_SERVER }}:3003/
 
       - name: Install snapcraft
         run: |
