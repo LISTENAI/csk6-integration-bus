@@ -357,6 +357,7 @@ jobs:
           apt update
           apt install -y snapd
           systemctl enable snapd
+          systemctl start snapd
           snap install snapcraft --classic
       
       - name: Build snap package
