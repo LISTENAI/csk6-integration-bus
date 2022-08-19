@@ -38,7 +38,7 @@ imgtool>=1.7.1
 protobuf
 PyGithub
 pyserial
-https://cdn.iflyos.cn/public/lisa-binary/pyocd/pyocd-0.34.2.dev20-py3-none-any.whl
+https://github.com/listenai-jw/crispy-engine/releases/download/v3.9.0/pyocd-0.34.2.dev20-py3-none-any.whl
 tabulate
 cbor>=1.0.0
 psutil
