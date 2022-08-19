@@ -355,7 +355,7 @@ jobs:
       - name: Install snapcraft
         run: |
           apt update
-          apt install -y snapd
+          apt install -y snapd snap-confine
           systemctl enable snapd
           systemctl start snapd
           snap install snapcraft --classic
