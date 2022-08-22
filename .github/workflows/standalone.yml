@@ -317,8 +317,9 @@ jobs:
             intermediate_package_macos-11
 
   build-snap:
-    runs-on: [ self-hosted, Linux, X64, zgsz-02 ]
+    runs-on: [ self-hosted, Windows, X64, zgsz-02 ]
     needs: [ test-bash, merge-whl-packages ]
+    image: 'snapcore/snapcraft:latest'
 
     steps:
       - uses: actions/checkout@v3
