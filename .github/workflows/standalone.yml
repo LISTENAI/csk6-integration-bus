@@ -322,9 +322,9 @@ jobs:
     container:
       image: snapcore/snapcraft:latest
       env:
-        HTTP_PROXY=${{ secrets.LRS_PROXY_SERVER }}
-        HTTPS_PROXY=${{ secrets.LRS_PROXY_SERVER }}
-        NO_PROXY=*.iflyos.cn,*.listenai.com
+        HTTP_PROXY: ${{ secrets.LRS_PROXY_SERVER }}
+        HTTPS_PROXY: ${{ secrets.LRS_PROXY_SERVER }}
+        NO_PROXY: '*.iflyos.cn,*.listenai.com'
 
     steps:
       - uses: actions/checkout@v3
