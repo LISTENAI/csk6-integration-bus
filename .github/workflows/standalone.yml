@@ -41,7 +41,7 @@ jobs:
         npm root -g
         npm bin -g
         npm i -g zx
-        npm install -g @listenai/lisa@beta
+        npm install -g @listenai/lisa
         npm install -g yarn
 
     - name: Install Plugins
