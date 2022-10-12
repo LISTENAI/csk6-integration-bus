@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - develop
+      - feature/add_aarch64_runner
 
 permissions:
   contents: read
