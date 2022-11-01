@@ -44,3 +44,4 @@ cbor>=1.0.0
 psutil
 enquiries
 wheel
+cryptography
