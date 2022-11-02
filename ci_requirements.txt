@@ -45,3 +45,5 @@ tabulate
 cbor>=1.0.0
 psutil
 wheel
+setuptools>=30.3.0
+setuptools_scm>=3.3.1
