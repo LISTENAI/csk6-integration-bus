@@ -116,7 +116,7 @@ lisa_inst_requirements() {
           lisa_echo >&2 "*** Oops...something went wrong when enabling EPEL repository"
           exit 1
         fi
-        sudo yum install -y gpg p7zip-full pv xz git
+        sudo yum install -y gpg p7zip p7zip-plugins pv xz git
         if [ $? -ne 0 ]; then
           lisa_echo >&2 "*** Oops...something went wrong when installing required application(s)"
           exit 1
@@ -176,6 +176,19 @@ lisa_do_install() {
 
   local INSTALL_DIR
   INSTALL_DIR="$(lisa_default_install_dir)"
+
+  if [ -d "${INSTALL_DIR}" ]; then
+    lisa_echo >&2 "************************ <ERROR> ***********************************"
+    lisa_echo >&2 "${INSTALL_DIR} already exists!"
+    lisa_echo >&2 "It could indicate that LISA has already installed, and this blocked installer from proceed."
+    lisa_echo >&2 "Please remove it with following command first if you intend to re-install LISA."
+    lisa_echo >&2 "======"
+    lisa_echo >&2 "rm -rf ${INSTALL_DIR}"
+    lisa_echo >&2 "======"
+    lisa_echo >&2 "Thank you."
+    lisa_echo >&2 "************************ </ERROR> **********************************"
+    exit 2
+  fi
 
   local LISA_OS
   LISA_OS="$(lisa_get_os)"
@@ -290,8 +303,11 @@ lisa_do_install() {
   rm -f "$INSTALL_DIR/lisa-zephyr-whl-latest.7z"
   rm -f "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z.sig"
   rm -f "$INSTALL_DIR/lisa-zephyr-whl-latest.7z.sig"
-  
-  lisa_echo "=> Success! try run command 'lisa info zephyr'"
+  cd "$INSTALL_DIR/../csk-sdk/zephyr"
+  git reset --hard
+  git clean -fxd
+
+  lisa_echo "=> Completed with GREAT SUCCESS! Try and run command 'lisa info zephyr'"
 }
 
 lisa_root_check
