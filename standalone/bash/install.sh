@@ -116,7 +116,7 @@ lisa_inst_requirements() {
           lisa_echo >&2 "*** Oops...something went wrong when enabling EPEL repository"
           exit 1
         fi
-        sudo yum install -y gpg p7zip-full pv xz git
+        sudo yum install -y gpg p7zip p7zip-plugins pv xz git
         if [ $? -ne 0 ]; then
           lisa_echo >&2 "*** Oops...something went wrong when installing required application(s)"
           exit 1
@@ -172,10 +172,24 @@ lisa_channel_selection() {
 }
 
 lisa_do_install() {
+  sudo -k
   lisa_echo "Using channel ${DOWNLOAD_CHANNEL}"
 
   local INSTALL_DIR
   INSTALL_DIR="$(lisa_default_install_dir)"
+
+  if [ -d "${INSTALL_DIR}" ]; then
+    lisa_echo >&2 "************************ <ERROR> ***********************************"
+    lisa_echo >&2 "${INSTALL_DIR} already exists!"
+    lisa_echo >&2 "It could indicate that LISA has already installed, and this blocked installer from proceed."
+    lisa_echo >&2 "Please remove it with following command first if you intend to re-install LISA."
+    lisa_echo >&2 "======"
+    lisa_echo >&2 "rm -rf ${INSTALL_DIR}"
+    lisa_echo >&2 "======"
+    lisa_echo >&2 "Thank you."
+    lisa_echo >&2 "************************ </ERROR> **********************************"
+    exit 2
+  fi
 
   local LISA_OS
   LISA_OS="$(lisa_get_os)"
@@ -254,9 +268,26 @@ lisa_do_install() {
   lisa_shell_command_link
   export LISA_HOME=$INSTALL_DIR/../
   export LISA_PREFIX=$INSTALL_DIR
-  $LISA_HOME/lisa/libexec/lisa zep install
-  if [ $? -ne 0 ]; then
-    lisa_echo >&2 '*** Unable to initialize virtual developing environment'
+  declare -i VENV_INIT_RETRY=0
+  local VENV_INIT_RESULT=-1
+  while [ $VENV_INIT_RETRY -lt 2 ]; do
+    $LISA_HOME/lisa/libexec/lisa zep install
+    VENV_INIT_RESULT=$?
+    if [ $VENV_INIT_RESULT -ne 0 ]; then
+      VENV_INIT_RETRY=$((VENV_INIT_RETRY + 1))
+      if [ $VENV_INIT_RESULT -eq 2 ]; then
+        lisa_echo >&2 '*** Failed to initialize with offline packages, will try online ones...'
+        rm -rf "${LISA_HOME}/lisa-zephyr/whl"
+        continue
+      else
+        lisa_echo >&2 '*** Unable to initialize virtual developing environment'
+        exit 2
+      fi
+    else
+      break
+    fi
+  done
+  if [ $VENV_INIT_RESULT -ne 0 ]; then
     exit 2
   fi
   echo "{\"env\":\"csk6\"}" |tee $LISA_HOME/lisa-zephyr/config.json >/dev/null 2>&1
@@ -290,8 +321,11 @@ lisa_do_install() {
   rm -f "$INSTALL_DIR/lisa-zephyr-whl-latest.7z"
   rm -f "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z.sig"
   rm -f "$INSTALL_DIR/lisa-zephyr-whl-latest.7z.sig"
-  
-  lisa_echo "=> Success! try run command 'lisa info zephyr'"
+  cd "$INSTALL_DIR/../csk-sdk/zephyr"
+  git reset --hard
+  git clean -fxd
+
+  lisa_echo "=> Completed with GREAT SUCCESS! Try and run command 'lisa info zephyr'"
 }
 
 lisa_root_check
