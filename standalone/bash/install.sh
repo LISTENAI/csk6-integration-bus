@@ -172,6 +172,7 @@ lisa_channel_selection() {
 }
 
 lisa_do_install() {
+  sudo -k
   lisa_echo "Using channel ${DOWNLOAD_CHANNEL}"
 
   local INSTALL_DIR
@@ -267,9 +268,26 @@ lisa_do_install() {
   lisa_shell_command_link
   export LISA_HOME=$INSTALL_DIR/../
   export LISA_PREFIX=$INSTALL_DIR
-  $LISA_HOME/lisa/libexec/lisa zep install
-  if [ $? -ne 0 ]; then
-    lisa_echo >&2 '*** Unable to initialize virtual developing environment'
+  declare -i VENV_INIT_RETRY=0
+  local VENV_INIT_RESULT=-1
+  while [ $VENV_INIT_RETRY -lt 2 ]; do
+    $LISA_HOME/lisa/libexec/lisa zep install
+    VENV_INIT_RESULT=$?
+    if [ $VENV_INIT_RESULT -ne 0 ]; then
+      VENV_INIT_RETRY=$((VENV_INIT_RETRY + 1))
+      if [ $VENV_INIT_RESULT -eq 2 ]; then
+        lisa_echo >&2 '*** Failed to initialize with offline packages, will try online ones...'
+        rm -rf "${LISA_HOME}/lisa-zephyr/whl"
+        continue
+      else
+        lisa_echo >&2 '*** Unable to initialize virtual developing environment'
+        exit 2
+      fi
+    else
+      break
+    fi
+  done
+  if [ $VENV_INIT_RESULT -ne 0 ]; then
     exit 2
   fi
   echo "{\"env\":\"csk6\"}" |tee $LISA_HOME/lisa-zephyr/config.json >/dev/null 2>&1
