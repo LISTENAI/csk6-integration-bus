@@ -249,7 +249,8 @@ jobs:
 
   publish-docker:
     needs: test-bash
-    runs-on: [ self-hosted, Linux, X64, zgsz-02 ]
+    runs-on: [ self-hosted, Windows, X64, zgsz-02 ]
+    container: docker:dind-20.10
 
     steps:
       - uses: actions/checkout@v3
