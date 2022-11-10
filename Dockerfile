@@ -13,6 +13,7 @@ RUN useradd -d /home/lisa -s /usr/bin/bash lisa \
 USER lisa
 ENV LISA_HOME=/home/lisa/.listenai
 ENV LISA_PREFIX=${LISA_HOME}/lisa
+ENV PIP_INDEX_URL=https://pypi.org/simple
 
 RUN mkdir -p ${LISA_HOME}/lisa
 
