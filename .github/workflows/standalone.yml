@@ -270,8 +270,8 @@ jobs:
           mode: Download
           username: ${{ secrets.LRS_RES_USER }}
           password: ${{ secrets.LRS_RES_TOKEN }}
-          source: /interchange/csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
-          destination: ./csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
+          source: /interchange/csk-integration-bus-linux_x64.tar.xz
+          destination: ./csk-integration-bus-linux_x64.tar.xz
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
