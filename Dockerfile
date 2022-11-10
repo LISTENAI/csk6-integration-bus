@@ -43,7 +43,6 @@ RUN useradd -d /home/lisa -s /usr/bin/bash lisa \
 
 COPY --from=build --chown=lisa:lisa /home/lisa/.listenai /home/lisa/.listenai
 COPY --from=build --chown=root:root /etc/environment /etc/environment
-COPY --chown=root:root configs/sources.list /etc/apt/sources.list
 
 RUN ln -s /home/lisa/.listenai/lisa/libexec/lisa /usr/local/bin/lisa \
     && update-ca-certificates \
