@@ -31,16 +31,17 @@ RUN ${LISA_HOME}/lisa/libexec/lisa zep install \
     && ${LISA_HOME}/lisa/libexec/lisa update zephyr
 
 USER root
-RUN echo "LISA_HOME=\"${LISA_HOME}\"" |tee -a /etc/environment \
-    && echo "LISA_PREFIX=\"${LISA_PREFIX}\"" |tee -a /etc/environment
+RUN echo "LISA_HOME=${LISA_HOME}" |tee -a /etc/environment \
+    && echo "LISA_PREFIX=${LISA_PREFIX}" |tee -a /etc/environment
 
 FROM ubuntu:22.04
 USER root
 WORKDIR /home/lisa
 RUN useradd -d /home/lisa -s /usr/bin/bash lisa \
     && apt update \
-    && apt install --no-install-recommends -y git bash libusb-1.0-0 udev ca-certificates locales \
-    && chown -R lisa:lisa /home/lisa
+    && apt install --no-install-recommends -y git bash libusb-1.0-0 udev ca-certificates locales sudo \
+    && chown -R lisa:lisa /home/lisa \
+    && echo "lisa   ALL=(ALL:ALL) NOPASSWD:ALL" |tee /etc/sudoers.d/lisa
 
 COPY --from=build --chown=lisa:lisa /home/lisa/.listenai /home/lisa/.listenai
 COPY --from=build --chown=root:root /etc/environment /etc/environment
