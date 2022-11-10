@@ -196,12 +196,6 @@ jobs:
         assets: |
           csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}:/public/cskTools/lisa-zephyr-${{ matrix.dist_suffix }}${{ matrix.format }}
 
-    - name: Upload to artifacts (for docker)
-      uses: actions/upload-artifact@v3
-      with:
-        name: csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
-        path: csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
-
   # test-pwsh:
   #   needs: bundle-pwsh
   #   runs-on: ${{ matrix.os }}
@@ -255,14 +249,29 @@ jobs:
 
   publish-docker:
     needs: test-bash
-    runs-on: ubuntu-latest
+    runs-on: [ self-hosted, Linux, X64, zgsz-02 ]
 
     steps:
+      - name: Check-out listenai-local-cache library
+        uses: actions/checkout@v3
+        with:
+          repository: LISTENAI/runner-local-cache
+          ref: v1.0.4
+          path: './runner-local-cache'
+          token: ${{ secrets.ACTION_CHECKOUT_TOKEN }}
+
       - uses: actions/checkout@v3
 
-      - uses: actions/download-artifact@v3
+      - name: Download artifacts (local)
+        uses: ./runner-local-cache
         with:
-          name: csk-integration-bus-linux_x64.tar.xz
+          host: ${{ secrets.LRS_RES_SERVER }}
+          port: ${{ secrets.LRS_RES_PORT }}
+          mode: Download
+          username: ${{ secrets.LRS_RES_USER }}
+          password: ${{ secrets.LRS_RES_TOKEN }}
+          source: /interchange/csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
+          destination: ./csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
