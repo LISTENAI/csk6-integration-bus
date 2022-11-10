@@ -249,8 +249,9 @@ jobs:
 
   publish-docker:
     needs: test-bash
-    runs-on: [ self-hosted, Linux, X64, zgsz-02 ]
-    container: docker:dind-20.10
+    runs-on: ubuntu-latest
+    env:
+      PIP_DEFAULT_INDEX_URL: "https://pypi.org/"
 
     steps:
       - uses: actions/checkout@v3
