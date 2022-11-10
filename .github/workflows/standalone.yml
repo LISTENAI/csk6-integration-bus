@@ -135,8 +135,6 @@ jobs:
   test-bash:
     needs: bundle-bash
     runs-on: ${{ matrix.os }}
-    env:
-      PIP_INDEX_URL: https://pypi.org/simple
 
     strategy:
       matrix:
@@ -259,6 +257,8 @@ jobs:
   publish-docker:
     needs: test-bash
     runs-on: ubuntu-latest
+    env:
+      PIP_INDEX_URL: https://pypi.org/simple
 
     steps:
       - uses: actions/checkout@v3
