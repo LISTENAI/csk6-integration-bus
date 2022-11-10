@@ -135,6 +135,8 @@ jobs:
   test-bash:
     needs: bundle-bash
     runs-on: ${{ matrix.os }}
+    env:
+      PIP_INDEX_URL: https://pypi.org/simple
 
     strategy:
       matrix:
@@ -198,6 +200,7 @@ jobs:
 
       - name: Upload to artifacts (for docker)
         uses: actions/upload-artifact@v3
+        if: matrix.dist_suffix == 'linux_x64'
         with:
           name: csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
           path: csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
