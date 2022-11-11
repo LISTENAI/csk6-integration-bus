@@ -282,4 +282,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: listenaiofficial/csk6:latest,listenaiofficial/csk6:1.6.5
+          tags: listenaiofficial/csk6:latest,listenaiofficial/csk6:1.6.7
