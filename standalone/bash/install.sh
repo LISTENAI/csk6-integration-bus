@@ -323,6 +323,7 @@ lisa_do_install() {
     lisa_echo >&2 '*** Unable to initialize west workspace'
     exit 2
   fi
+  $LISA_HOME/lisa/libexec/lisa zep exec python -m pip install --upgrade pip
 
   case "${LISA_OS}" in
     linux)
