@@ -187,10 +187,11 @@ jobs:
       - name: Upload to oss
         id: upload_to_oss
         uses: listenai-jw/upload-to-oss@master
+        if: github.ref == 'refs/heads/master'
         with:
           key-id: ${{ secrets.OSS_KEY_ID }}
           key-secret: ${{ secrets.OSS_KEY_SECRET }}
-          endpoint: oss-cn-shanghai.aliyuncs.com
+          endpoint: https://oss-cn-shanghai.aliyuncs.com
           bucket: iflyos-external
           assets: |
             csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}:/public/cskTools/lisa-zephyr-${{ matrix.dist_suffix }}${{ matrix.format }}
