@@ -20,13 +20,14 @@ mock>=4.0.1
 python-magic
 junitparser<2
 pylint
-breathe~=4.23,!=4.29.0
-sphinx~=3.3
-sphinx_rtd_theme>=0.5.2,<1.0
+breathe>=4.30,<4.33 # 4.33: disabled due to #803 and #805 issues
+sphinx~=4.0
+sphinx_rtd_theme~=1.0
 sphinx-tabs
 sphinxcontrib-svg2pdfconverter
-pygments~=2.9
-sphinx-notfound-page>=0.6
+pygments>=2.9
+sphinx-notfound-page
+sphinx-copybutton
 PyYAML>=5.1
 pykwalify
 anytree
@@ -39,8 +40,10 @@ protobuf
 PyGithub
 pyserial
 https://cdn.iflyos.cn/public/lisa-binary/pyocd/pyocd-0.34.2.dev20-py3-none-any.whl
+enquiries
 tabulate
 cbor>=1.0.0
 psutil
-enquiries
 wheel
+setuptools>=30.3.0
+setuptools_scm>=3.3.1

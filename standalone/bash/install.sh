@@ -4,8 +4,16 @@ lisa_has() {
   which "$1" > /dev/null 2>&1
 }
 
+lisa_home_dir() {
+  printf %s "${HOME}/.listenai"
+}
+
 lisa_default_install_dir() {
-  printf %s "${HOME}/.listenai/lisa"
+  printf %s "$(lisa_home_dir)/lisa"
+}
+
+lisa_default_download_dir() {
+  printf %s "$(lisa_home_dir)_download"
 }
 
 lisa_echo() {
@@ -14,12 +22,21 @@ lisa_echo() {
 
 lisa_download() {
   if lisa_has "curl"; then
-    command curl --fail --compressed -q "$@"
+    CURRENT_TIMESTAMP=$(date +"%s")
+    command curl --fail --compressed -q "$@" 2> >(tee /tmp/${CURRENT_TIMESTAMP}.txt)
     local CURL_ERR=$?
     if [ $CURL_ERR -ne 0 ]; then
-      lisa_echo >&2 "*** Erm.... unable to download the archive, error = ${CURL_ERR}"
-      exit 1
+      grep "The requested URL returned error: 416" "/tmp/${CURRENT_TIMESTAMP}.txt" >/dev/null
+      local CURL_416LOG_RESULT=$?
+      if [ $CURL_416LOG_RESULT -ne 0 ]; then
+        lisa_echo >&2 "*** Erm.... unable to download the archive, error = ${CURL_ERR}"
+        exit 1
+      else
+        lisa_echo "√ Server says this archive has been fully downloaded!"
+        lisa_echo ""
+      fi
     fi
+    rm -f "/tmp/${CURRENT_TIMESTAMP}.txt"
   elif lisa_has "wget"; then
     ARGS=$(lisa_echo "$@" | command sed -e 's/--progress-bar /--progress=bar /' \
                             -e 's/--compressed //' \
@@ -57,7 +74,7 @@ lisa_tar() {
 
 lisa_un7z() {
   if lisa_has "7z"; then
-    command 7z x "$1" -o"$2"
+    command 7z x -y "$1" -o"$2"
     if [ $? -ne 0 ]; then
       lisa_echo >&2 '*** Erm.... unable to decompress the archive, something went wrong?'
       exit 1
@@ -116,7 +133,7 @@ lisa_inst_requirements() {
           lisa_echo >&2 "*** Oops...something went wrong when enabling EPEL repository"
           exit 1
         fi
-        sudo yum install -y gpg p7zip-full pv xz git
+        sudo yum install -y gpg p7zip p7zip-plugins pv xz git
         if [ $? -ne 0 ]; then
           lisa_echo >&2 "*** Oops...something went wrong when installing required application(s)"
           exit 1
@@ -172,10 +189,30 @@ lisa_channel_selection() {
 }
 
 lisa_do_install() {
+  sudo -k
   lisa_echo "Using channel ${DOWNLOAD_CHANNEL}"
+
+  local LISA_HOME_DIR
+  LISA_HOME_DIR="$(lisa_home_dir)"
 
   local INSTALL_DIR
   INSTALL_DIR="$(lisa_default_install_dir)"
+
+  local DOWNLOAD_DIR
+  DOWNLOAD_DIR="$(lisa_default_download_dir)"
+
+  if [ -d "${INSTALL_DIR}" ]; then
+    lisa_echo >&2 "************************ <ERROR> ***********************************"
+    lisa_echo >&2 "${LISA_HOME_DIR} already exists!"
+    lisa_echo >&2 "It could indicate that LISA has already installed, and this blocked installer from proceed."
+    lisa_echo >&2 "Please remove it with following command first if you intend to re-install LISA."
+    lisa_echo >&2 "======"
+    lisa_echo >&2 "rm -rf ${LISA_HOME_DIR}"
+    lisa_echo >&2 "======"
+    lisa_echo >&2 "Thank you."
+    lisa_echo >&2 "************************ </ERROR> **********************************"
+    exit 2
+  fi
 
   local LISA_OS
   LISA_OS="$(lisa_get_os)"
@@ -207,8 +244,8 @@ lisa_do_install() {
   local LISA_WHL_SIG
   LISA_WHL_SIG="https://cdn.iflyos.cn/public/lisa-zephyr-dist/lisa-zephyr-whl-latest.7z.sig"
 
-  if ! [ -d "${INSTALL_DIR}" ]; then
-    command mkdir -p $INSTALL_DIR
+  if ! [ -d "${DOWNLOAD_DIR}" ]; then
+    command mkdir -p $DOWNLOAD_DIR
   fi
 
   lisa_echo "=> Installing 7z & gpg"
@@ -218,19 +255,19 @@ lisa_do_install() {
   local GPGCHECK=$?
 
   lisa_echo "=> Downloading LISA"
-  lisa_download --progress-bar "$LISA_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}"
+  lisa_download --progress-bar -o "$DOWNLOAD_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}" -C - "$LISA_SOURCE"
   lisa_echo "=> Downloading SDK package"
-  lisa_download --progress-bar "$LISA_SDK_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z"
+  lisa_download --progress-bar -o "$DOWNLOAD_DIR/lisa-zephyr-sdk-latest.7z" -C - "$LISA_SDK_SOURCE"
   lisa_echo "=> Downloading required python wheel package"
-  lisa_download --progress-bar "$LISA_WHL_SOURCE" -o "$INSTALL_DIR/lisa-zephyr-whl-latest.7z"
+  lisa_download --progress-bar -o "$DOWNLOAD_DIR/lisa-zephyr-whl-latest.7z" -C - "$LISA_WHL_SOURCE"
 
   if [ $GPGCHECK -eq 0 ]; then
     lisa_echo "=> Checking integrity of resource package"
-    lisa_download -s "$LISA_SDK_SIG" -o "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z.sig"
-    lisa_download -s "$LISA_WHL_SIG" -o "$INSTALL_DIR/lisa-zephyr-whl-latest.7z.sig"
-    lisa_verify_signature "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z.sig" "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z"
+    lisa_download -s "$LISA_SDK_SIG" -o "$DOWNLOAD_DIR/lisa-zephyr-sdk-latest.7z.sig"
+    lisa_download -s "$LISA_WHL_SIG" -o "$DOWNLOAD_DIR/lisa-zephyr-whl-latest.7z.sig"
+    lisa_verify_signature "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z.sig" "$DOWNLOAD_DIR/lisa-zephyr-sdk-latest.7z"
     local SDK_SIG_OK=$?
-    lisa_verify_signature "$INSTALL_DIR/lisa-zephyr-whl-latest.7z.sig" "$INSTALL_DIR/lisa-zephyr-whl-latest.7z"
+    lisa_verify_signature "$INSTALL_DIR/lisa-zephyr-whl-latest.7z.sig" "$DOWNLOAD_DIR/lisa-zephyr-whl-latest.7z"
     local WHL_SIG_OK=$?
     if [ $SDK_SIG_OK -ne 0 ] || [ $WHL_SIG_OK -ne 0 ]; then
       lisa_echo >&2 "*** Resource packages integrity check failed!"
@@ -238,25 +275,46 @@ lisa_do_install() {
     fi
   fi
 
+  if ! [ -d "${INSTALL_DIR}" ]; then
+    command mkdir -p $INSTALL_DIR
+  fi
+
   lisa_echo "=> Extracting LISA to '$INSTALL_DIR'"
-  lisa_tar "$INSTALL_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}" "$INSTALL_DIR"
+  lisa_tar "$DOWNLOAD_DIR/lisa-zephyr-${LISA_OS}_x64${LISA_FORMAT}" "$INSTALL_DIR"
   mkdir -p "$INSTALL_DIR/../lisa-zephyr"
   mv "$INSTALL_DIR/packages" "$INSTALL_DIR/../lisa-zephyr"
   lisa_echo "=> Extracting SDK package"
   mkdir -p "$INSTALL_DIR/../csk-sdk"
-  lisa_un7z "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z" "$INSTALL_DIR/../csk-sdk"
+  lisa_un7z "$DOWNLOAD_DIR/lisa-zephyr-sdk-latest.7z" "$INSTALL_DIR/../csk-sdk"
   lisa_echo "=> Extracting WHL package"
   mkdir -p "$INSTALL_DIR/../lisa-zephyr/whl"
-  lisa_un7z "$INSTALL_DIR/lisa-zephyr-whl-latest.7z" "$INSTALL_DIR/../lisa-zephyr/whl"
+  lisa_un7z "$DOWNLOAD_DIR/lisa-zephyr-whl-latest.7z" "$INSTALL_DIR/../lisa-zephyr/whl"
   mv "$INSTALL_DIR/../lisa-zephyr/whl/dependencies/local_requirements.txt" "$INSTALL_DIR/../lisa-zephyr/whl/local_requirements.txt"
 
   lisa_echo "=> Preparing workspace specially for you"
   lisa_shell_command_link
-  export LISA_HOME=$INSTALL_DIR/../
+  export LISA_HOME=$LISA_HOME_DIR
   export LISA_PREFIX=$INSTALL_DIR
-  $LISA_HOME/lisa/libexec/lisa zep install
-  if [ $? -ne 0 ]; then
-    lisa_echo >&2 '*** Unable to initialize virtual developing environment'
+  declare -i VENV_INIT_RETRY=0
+  local VENV_INIT_RESULT=-1
+  while [ $VENV_INIT_RETRY -lt 2 ]; do
+    $LISA_HOME/lisa/libexec/lisa zep install
+    VENV_INIT_RESULT=$?
+    if [ $VENV_INIT_RESULT -ne 0 ]; then
+      VENV_INIT_RETRY=$((VENV_INIT_RETRY + 1))
+      if [ $VENV_INIT_RESULT -eq 2 ]; then
+        lisa_echo >&2 '*** Failed to initialize with offline packages, will try online ones...'
+        rm -rf "${LISA_HOME}/lisa-zephyr/whl"
+        continue
+      else
+        lisa_echo >&2 '*** Unable to initialize virtual developing environment'
+        exit 2
+      fi
+    else
+      break
+    fi
+  done
+  if [ $VENV_INIT_RESULT -ne 0 ]; then
     exit 2
   fi
   echo "{\"env\":\"csk6\"}" |tee $LISA_HOME/lisa-zephyr/config.json >/dev/null 2>&1
@@ -265,6 +323,7 @@ lisa_do_install() {
     lisa_echo >&2 '*** Unable to initialize west workspace'
     exit 2
   fi
+  $LISA_HOME/lisa/libexec/lisa zep exec python -m pip install --upgrade pip
 
   case "${LISA_OS}" in
     linux)
@@ -285,13 +344,12 @@ lisa_do_install() {
   source /etc/environment
 
   lisa_echo "=> Some housekeeping"
-  rm -f "$INSTALL_DIR/lisa-zephyr-linux_x64.tar.xz"
-  rm -f "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z"
-  rm -f "$INSTALL_DIR/lisa-zephyr-whl-latest.7z"
-  rm -f "$INSTALL_DIR/lisa-zephyr-sdk-latest.7z.sig"
-  rm -f "$INSTALL_DIR/lisa-zephyr-whl-latest.7z.sig"
-  
-  lisa_echo "=> Success! try run command 'lisa info zephyr'"
+  rm -rf "$DOWNLOAD_DIR"
+  cd "$LISA_HOME_DIR/csk-sdk/zephyr"
+  git reset --hard
+  git clean -fxd
+
+  lisa_echo "=> Completed with GREAT SUCCESS! Try and run command 'lisa info zephyr'"
 }
 
 lisa_root_check
