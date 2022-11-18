@@ -4,6 +4,8 @@ on: [ push ]
 
 env:
   node_ver: v16.14.0
+  acr_registry: registry.cn-shenzhen.aliyuncs.com
+  zephyr_plugin_ver: 1.6.8
 
 jobs:
   bundle-bash:
@@ -277,9 +279,23 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: Build and push
+      - name: Build and push to Docker Hub
         uses: docker/build-push-action@v3
         with:
           context: .
           push: true
-          tags: listenai/csk6:latest,listenai/csk6:1.6.8
+          tags: listenai/csk6:latest,listenai/csk6:${{ env.zephyr_plugin_ver }}
+
+      - name: Login to ACR
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.acr_registry }}
+          username: ${{ secrets.DOCKER_ACR_USERNAME }}
+          password: ${{ secrets.DOCKER_ACR_TOKEN }}
+
+      - name: Build and push to ACR
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: ${{ env.acr_registry }}/lsfactory/csk6:latest,${{ env.acr_registry }}/lsfactory/csk6:${{ env.zephyr_plugin_ver }}
