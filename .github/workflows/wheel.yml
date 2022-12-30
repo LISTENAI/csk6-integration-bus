@@ -39,7 +39,7 @@ jobs:
           7z a intermediate_package_${{ matrix.os }}.7z ./pip_packages/* -mx0
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: intermediate_package_${{ matrix.os }}
           path: intermediate_package_${{ matrix.os }}.7z
@@ -66,17 +66,13 @@ jobs:
           7z a lisa-zephyr-whl-latest.7z ./dependencies -mx3
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: pip_packages
           path: lisa-zephyr-whl-latest.7z
 
       - name: Remove intermediate artifacts
-        uses: geekyeggo/delete-artifact@v1
+        uses: geekyeggo/delete-artifact@v2
         with:
           name: |
-            intermediate_package_windows-2022
-            intermediate_package_ubuntu-18.04
-            intermediate_package_ubuntu-20.04
-            intermediate_package_macos-12
-            intermediate_package_macos-11
+            intermediate_package_*
