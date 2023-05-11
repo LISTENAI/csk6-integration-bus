@@ -8,7 +8,7 @@ psutil
 pylink-square
 anytree
 intelhex
-west>=0.10.1
+west>=1.0.0
 windows-curses; sys_platform == "win32"
 colorama
 ply>=3.10
