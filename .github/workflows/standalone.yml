@@ -4,6 +4,7 @@ on: [ push ]
 
 env:
   node_ver: v16.14.0
+  GIT_TERMINAL_PROMPT: 1
 
 jobs:
   bundle-bash:
@@ -37,6 +38,7 @@ jobs:
         run: |
           export PATH=$PWD/node/bin:$PATH
           export npm_config_prefix=$PWD/node
+          export npm_config_registry=https://registry.npmmirror.com
           npm prefix -g
           npm root -g
           npm bin -g
