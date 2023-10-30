@@ -26,8 +26,8 @@ RUN tar xJf "${LISA_HOME}/lisa/lisa-zephyr-linux_x64.tar.xz" -C "${LISA_HOME}/li
 
 RUN ${LISA_HOME}/lisa/libexec/lisa zep install \
     && echo "{\"env\":\"csk6\"}" |tee ${LISA_HOME}/lisa-zephyr/config.json \
-    && ${LISA_HOME}/lisa/libexec/lisa zep sdk set --default \
-    && rm -f "${LISA_HOME}/lisa/lisa-zephyr-linux_x64.tar.xz" \
+    && ${LISA_HOME}/lisa/libexec/lisa zep sdk set ${LISA_HOME}/csk-sdk-v2 --from-git="https://cloud.listenai.com/zephyr/csk#v2.0.0-alpha3" \
+    #&& rm -f "${LISA_HOME}/lisa/lisa-zephyr-linux_x64.tar.xz" \
     && ${LISA_HOME}/lisa/libexec/lisa update zephyr
 
 USER root
