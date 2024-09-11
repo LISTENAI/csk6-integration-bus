@@ -26,7 +26,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Download Node distribution
-        run: wget --no-check-certificate https://${{ secrets.LRS_RES_SERVER }}:3003/node/${{ env.node_ver }}/node-${{ env.node_ver }}-${{ matrix.node_suffix }}${{ matrix.format }}
+        run: wget --no-check-certificate -nv http://${{ secrets.LRS_RES_SERVER }}:9000/public/node/${{ env.node_ver }}/node-${{ env.node_ver }}-${{ matrix.node_suffix }}${{ matrix.format }}
 
       - name: Extract Node
         run: |
