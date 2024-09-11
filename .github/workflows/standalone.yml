@@ -60,15 +60,8 @@ jobs:
           cd node && tar caf ../csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }} .
 
       - name: Upload cache (local)
-        uses: hkdobrev/minio-deploy-action@v1
-        with:
-          endpoint: ${{ secrets.LRS_MINIO_EP }}
-          access_key: ${{ secrets.LRS_MINIO_AK }}
-          secret_key: ${{ secrets.LRS_MINIO_SK }}
-          bucket: ${{ secrets.LRS_MINIO_BUCKET }}
-          insecure: true
-          source_dir: ./csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
-          target_dir: /csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
+        run: |
+          mc cp ./csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }} local/${{ secrets.LRS_MINIO_BUCKET }}/
 
   test-bash:
     needs: bundle-bash
@@ -90,14 +83,8 @@ jobs:
           (which node && rm -f $(which node) && echo Node removed) || echo Already removed
 
       - name: Download cache (local)
-        uses: 'ActiveChooN/minio-download-action@v1'
-        with:
-          endpoint: ${{ secrets.LRS_MINIO_EP }}
-          access_key: ${{ secrets.LRS_MINIO_AK }}
-          secret_key: ${{ secrets.LRS_MINIO_SK }}
-          bucket: ${{ secrets.LRS_MINIO_BUCKET }}
-          remote_path: /csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
-          local_path: ./csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
+        run: |
+          mc cp local/${{ secrets.LRS_MINIO_BUCKET }}/csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }} .
 
 #      - name: Check-out listenai-local-cache library
 #        uses: actions/checkout@v3
