@@ -23,7 +23,7 @@ jobs:
             dist_suffix: darwin_x64-v2
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Download Node distribution
         run: wget --no-check-certificate -nv http://${{ secrets.LRS_RES_SERVER }}:9000/public/node/${{ env.node_ver }}/node-${{ env.node_ver }}-${{ matrix.node_suffix }}${{ matrix.format }}
@@ -199,7 +199,7 @@ jobs:
             csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}:/public/cskTools/lisa-zephyr-${{ matrix.dist_suffix }}${{ matrix.format }}
 
       - name: Upload to artifacts (for docker)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: matrix.dist_suffix == 'linux_x64-v2'
         with:
           name: csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
@@ -261,9 +261,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: csk-integration-bus-linux_x64-v2.tar.xz
 
