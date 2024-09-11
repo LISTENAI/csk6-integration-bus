@@ -17,7 +17,7 @@ ENV PIP_INDEX_URL=https://pypi.org/simple
 
 RUN mkdir -p ${LISA_HOME}/lisa
 
-COPY --chown=lisa:lisa ./csk-integration-bus-linux_x64.tar.xz "${LISA_HOME}/lisa/lisa-zephyr-linux_x64.tar.xz"
+COPY --chown=lisa:lisa ./csk-integration-bus-linux_x64-v2.tar.xz "${LISA_HOME}/lisa/lisa-zephyr-linux_x64.tar.xz"
 
 ENV LANG=zh_CN.UTF8
 RUN tar xJf "${LISA_HOME}/lisa/lisa-zephyr-linux_x64.tar.xz" -C "${LISA_HOME}/lisa" \
