@@ -16,11 +16,11 @@ jobs:
           - os: [ self-hosted, Linux, X64, generic ]
             format: .tar.xz
             node_suffix: linux-x64
-            dist_suffix: linux_x64
+            dist_suffix: linux_x64-v2
           - os: [ self-hosted, macOS, X64, generic ]
             format: .tar.gz
             node_suffix: darwin-x64
-            dist_suffix: darwin_x64
+            dist_suffix: darwin_x64-v2
 
     steps:
       - uses: actions/checkout@v2
@@ -143,10 +143,10 @@ jobs:
         include:
           - os: [ self-hosted, Linux, X64, generic ]
             format: .tar.xz
-            dist_suffix: linux_x64
+            dist_suffix: linux_x64-v2
           - os: [ self-hosted, macOS, X64, generic ]
             format: .tar.gz
-            dist_suffix: darwin_x64
+            dist_suffix: darwin_x64-v2
 
     steps:
       - name: Remove pre-installed Node
@@ -200,7 +200,7 @@ jobs:
 
       - name: Upload to artifacts (for docker)
         uses: actions/upload-artifact@v3
-        if: matrix.dist_suffix == 'linux_x64'
+        if: matrix.dist_suffix == 'linux_x64-v2'
         with:
           name: csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
           path: csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
@@ -265,7 +265,7 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: csk-integration-bus-linux_x64.tar.xz
+          name: csk-integration-bus-linux_x64-v2.tar.xz
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
