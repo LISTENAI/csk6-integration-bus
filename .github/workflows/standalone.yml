@@ -59,80 +59,16 @@ jobs:
           export XZ_OPT="-T0"
           cd node && tar caf ../csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }} .
 
-      - name: Check-out listenai-local-cache library
-        uses: actions/checkout@v3
+      - name: Upload cache (local)
+        uses: hkdobrev/minio-deploy-action@v1
         with:
-          repository: LISTENAI/runner-local-cache
-          ref: v1.0.4
-          path: './runner-local-cache'
-          token: ${{ secrets.ACTION_CHECKOUT_TOKEN }}
-
-      - name: Upload artifacts (local)
-        uses: ./runner-local-cache
-        with:
-          host: ${{ secrets.LRS_RES_SERVER }}
-          port: ${{ secrets.LRS_RES_PORT }}
-          mode: Upload
-          username: ${{ secrets.LRS_RES_USER }}
-          password: ${{ secrets.LRS_RES_TOKEN }}
-          source: ./csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
-          destination: /interchange/csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
-
-          # bundle-pwsh:
-          #   runs-on: ${{ matrix.os }}
-
-          #   strategy:
-          #     matrix:
-          #       include:
-          #       - os: windows-latest
-          #         format: .zip
-          #         node_suffix: win-x64
-          #         dist_suffix: win32_x64
-
-          #   steps:
-          #   - uses: actions/checkout@v2
-
-          #   - name: Download Node distribution
-          #     run: Invoke-WebRequest https://nodejs.org/dist/${{ env.node_ver }}/node-${{ env.node_ver }}-${{ matrix.node_suffix }}${{ matrix.format }} -OutFile node-${{ env.node_ver }}-${{ matrix.node_suffix }}${{ matrix.format }}
-
-          #   - name: Extract Node
-          #     run: |
-          #       unzip node-${{ env.node_ver }}-${{ matrix.node_suffix }}${{ matrix.format }}
-          #       mv node-${{ env.node_ver }}-${{ matrix.node_suffix }} node
-
-          #   - name: Install LISA && dependencies
-          #     run: |
-          #       $env:Path = "$pwd\node;$env:Path"
-          #       $env:npm_config_prefix = "$pwd\node"
-          #       npm prefix -g
-          #       npm root -g
-          #       npm bin -g
-          #       npm i -g zx
-          #       npm install -g @listenai/lisa@beta
-          #       npm install -g yarn
-          #       npm install -g innosetup-compiler iconv-lite
-          #       npm install iconv-lite
-
-  #   - name: Install Plugins
-  #     run: |
-  #       $env:Path = "$pwd\node;$env:Path"
-  #       $env:npm_config_prefix = "$pwd\node"
-  #       zx main.mjs
-
-  #   - name: Make bundle
-  #     run: |
-  #       Copy-Item -Path standalone\pwsh -Destination node\bin -Recurse
-  #       # Compress-Archive -Path node\* -DestinationPath lisa-standalone-${{ matrix.dist_suffix }}${{ matrix.format }}
-  #       $env:Path = "$pwd\node;$env:Path"
-  #       $env:npm_config_prefix = "$pwd\node"
-  #       zx prepack.mjs
-  #       innosetup-compiler lisaiss.iss --O=lisa-standalone-${{ matrix.dist_suffix }}${{ matrix.format }}
-
-  #   - name: Upload artifact
-  #     uses: actions/upload-artifact@v2
-  #     with:
-  #       name: lisa-standalone-${{ matrix.dist_suffix }}
-  #       path: lisa-standalone-${{ matrix.dist_suffix }}${{ matrix.format }}
+          endpoint: ${{ secrets.LRS_MINIO_EP }}
+          access_key: ${{ secrets.LRS_MINIO_AK }}
+          secret_key: ${{ secrets.LRS_MINIO_SK }}
+          bucket: ${{ secrets.LRS_MINIO_BUCKET }}
+          insecure: true
+          source_dir: ./csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
+          target_dir: /csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
 
   test-bash:
     needs: bundle-bash
@@ -153,24 +89,34 @@ jobs:
         run: |
           (which node && rm -f $(which node) && echo Node removed) || echo Already removed
 
-      - name: Check-out listenai-local-cache library
-        uses: actions/checkout@v3
+      - name: Download cache (local)
+        uses: 'ActiveChooN/minio-download-action@v1'
         with:
-          repository: LISTENAI/runner-local-cache
-          ref: v1.0.4
-          path: './runner-local-cache'
-          token: ${{ secrets.ACTION_CHECKOUT_TOKEN }}
+          endpoint: ${{ secrets.LRS_MINIO_EP }}
+          access_key: ${{ secrets.LRS_MINIO_AK }}
+          secret_key: ${{ secrets.LRS_MINIO_SK }}
+          bucket: ${{ secrets.LRS_MINIO_BUCKET }}
+          remote_path: /csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
+          local_path: ./csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
 
-      - name: Download artifacts (local)
-        uses: ./runner-local-cache
-        with:
-          host: ${{ secrets.LRS_RES_SERVER }}
-          port: ${{ secrets.LRS_RES_PORT }}
-          mode: Download
-          username: ${{ secrets.LRS_RES_USER }}
-          password: ${{ secrets.LRS_RES_TOKEN }}
-          source: /interchange/csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
-          destination: ./csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
+#      - name: Check-out listenai-local-cache library
+#        uses: actions/checkout@v3
+#        with:
+#          repository: LISTENAI/runner-local-cache
+#          ref: v1.0.4
+#          path: './runner-local-cache'
+#          token: ${{ secrets.ACTION_CHECKOUT_TOKEN }}
+#
+#      - name: Download artifacts (local)
+#        uses: ./runner-local-cache
+#        with:
+#          host: ${{ secrets.LRS_RES_SERVER }}
+#          port: ${{ secrets.LRS_RES_PORT }}
+#          mode: Download
+#          username: ${{ secrets.LRS_RES_USER }}
+#          password: ${{ secrets.LRS_RES_TOKEN }}
+#          source: /interchange/csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
+#          destination: ./csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
 
       - name: Extract LISA
         run: |
@@ -204,57 +150,6 @@ jobs:
         with:
           name: csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
           path: csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
-
-    # test-pwsh:
-    #   needs: bundle-pwsh
-    #   runs-on: ${{ matrix.os }}
-
-    #   strategy:
-    #     matrix:
-    #       include:
-    #       - os: windows-latest
-    #         format: .zip
-    #         dist_suffix: win32_x64
-
-    #   steps:
-    #   - name: Remove pre-installed Node
-    #     run: |
-    #       Get-Command node
-    #       node -v
-    #       Remove-Item "C:\Program Files\nodejs" -Recurse
-
-    #   - name: Download artifact
-    #     uses: actions/download-artifact@v2
-    #     with:
-    #       name: lisa-standalone-${{ matrix.dist_suffix }}
-
-    # - name: Extract LISA
-    #   run: |
-    #     New-Item -Path $env:USERPROFILE\.listenai\lisa -ItemType Directory -Force
-    #     unzip lisa-standalone-${{ matrix.dist_suffix }}${{ matrix.format }} -d $env:USERPROFILE\.listenai\lisa
-
-    # - name: Test LISA (pwsh)
-    #   shell: pwsh
-    #   run: |
-    #     $env:Path = "$env:USERPROFILE\.listenai\lisa\bin;$env:Path"
-    #     lisa info
-
-    # - name: Test LISA (cmd)
-    #   shell: cmd
-    #   run: |
-    #     set Path=%USERPROFILE%\.listenai\lisa;%Path%
-    #     lisa info
-
-    # - name: Upload to oss
-    #   id: upload_to_oss
-    #   uses: tvrcgo/upload-to-oss@master
-    #   with:
-    #     key-id: ${{ secrets.OSS_KEY_ID }}
-    #     key-secret: ${{ secrets.OSS_KEY_SECRET }}
-    #     region: oss-cn-shanghai
-    #     bucket: iflyos-external
-    #     assets: |
-    #       lisa-standalone-${{ matrix.dist_suffix }}${{ matrix.format }}:/public/cskTools/lisa-zephyr-${{ matrix.dist_suffix }}${{ matrix.format }}
 
   publish-docker:
     needs: test-bash
