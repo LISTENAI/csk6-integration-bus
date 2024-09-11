@@ -13,11 +13,11 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: [ self-hosted, Linux, X64, zgsz-02 ]
+          - os: [ self-hosted, Linux, X64, generic ]
             format: .tar.xz
             node_suffix: linux-x64
             dist_suffix: linux_x64
-          - os: [ self-hosted, macOS, X64, zgsz-02 ]
+          - os: [ self-hosted, macOS, X64, generic ]
             format: .tar.gz
             node_suffix: darwin-x64
             dist_suffix: darwin_x64
@@ -141,10 +141,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: [ self-hosted, Linux, X64, zgsz-02 ]
+          - os: [ self-hosted, Linux, X64, generic ]
             format: .tar.xz
             dist_suffix: linux_x64
-          - os: [ self-hosted, macOS, X64, zgsz-02 ]
+          - os: [ self-hosted, macOS, X64, generic ]
             format: .tar.gz
             dist_suffix: darwin_x64
 
@@ -284,4 +284,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: listenai/csk6:latest,listenai/csk6:2.0.0
+          tags: listenai/csk6:latest,listenai/csk6:2.0.0-24091101
