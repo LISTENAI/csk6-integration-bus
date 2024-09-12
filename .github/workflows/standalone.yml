@@ -86,25 +86,6 @@ jobs:
         run: |
           mc cp local/${{ secrets.LRS_MINIO_BUCKET }}/csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }} .
 
-#      - name: Check-out listenai-local-cache library
-#        uses: actions/checkout@v3
-#        with:
-#          repository: LISTENAI/runner-local-cache
-#          ref: v1.0.4
-#          path: './runner-local-cache'
-#          token: ${{ secrets.ACTION_CHECKOUT_TOKEN }}
-#
-#      - name: Download artifacts (local)
-#        uses: ./runner-local-cache
-#        with:
-#          host: ${{ secrets.LRS_RES_SERVER }}
-#          port: ${{ secrets.LRS_RES_PORT }}
-#          mode: Download
-#          username: ${{ secrets.LRS_RES_USER }}
-#          password: ${{ secrets.LRS_RES_TOKEN }}
-#          source: /interchange/csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
-#          destination: ./csk-integration-bus-${{ matrix.dist_suffix }}${{ matrix.format }}
-
       - name: Extract LISA
         run: |
           mkdir -p $HOME/.listenai/lisa
